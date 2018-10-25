@@ -1,0 +1,4263 @@
+***********************************************************************
+*
+*	CODE GENERATION LISTING FOR: RFBridgeInterface
+*	COMPILER VERSION: 3.0.0.0
+*
+***********************************************************************
+
+**************************************************
+	CODE GENERATOR SUBROUTINES
+**************************************************
+
+$$MOD:
+005BA1B0  FB90 F3F1		sdiv r3, r0, r1
+005BA1B4  4359     		mul r1, r1, r3
+005BA1B6  EBC1 0000		rsb r0, r1, r0
+005BA1BA  4770     		bx lr
+
+$$MOD_U:
+005BA1BC  FBB0 F3F1		udiv r3, r0, r1
+005BA1C0  4359     		mul r1, r1, r3
+005BA1C2  EBC1 0000		rsb r0, r1, r0
+005BA1C6  4770     		bx lr
+
+**************************************************
+	List function block: RFBridgeInterface
+**************************************************
+
+FUNCTION_BLOCK RFBridgeInterface
+
+	{ DE:"(eLLabNetworkLib_A400) HTTP get page" }
+
+        VAR_INPUT
+Enable : BOOL;	{ DE:"FB enable" }
+SpyOn : BOOL;	{ DE:"Spy active" }
+CSend : BOOL;	{ DE:"Code send command" }
+DeviceIP : @USINT;	{ DE:"Device IP address" }
+DevicePort : UINT;	{ DE:"Device port" }
+PollTime : REAL;	{ DE:"Poll time (S)" }
+IAction : BYTE;	{ DE:"Sensor Action" }
+ITSyn : UINT;	{ DE:"Sensor TSyn" }
+ITLow : UINT;	{ DE:"Sensor TLow" }
+ITHigh : UINT;	{ DE:"Sensor THigh" }
+ICode : UDINT;	{ DE:"Sensor Code" }
+	END_VAR
+
+        VAR_OUTPUT
+Connected : BOOL;	{ DE:"Connected to device" }
+Fault : BOOL;	{ DE:"Execution fault" }
+SensorOk : BOOL;	{ DE:"Sensor Ok" }
+ErrorCtr : UINT;	{ DE:"Error counter" }
+RSSI : REAL;	{ DE:"RSSI value (dBi)" }
+Button : STRING[ 4 ];	{ DE:"Button status" }
+OAction : BYTE;	{ DE:"Sensor Action" }
+OTSyn : UINT;	{ DE:"Sensor TSyn" }
+OTLow : UINT;	{ DE:"Sensor TLow" }
+OTHigh : UINT;	{ DE:"Sensor THigh" }
+OCode : UDINT;	{ DE:"Sensor Code" }
+	END_VAR
+
+        VAR_EXTERNAL
+	{G:"System_variables"}
+SysActTaskID AT %MB0.64 : USINT;	{ DE:"System active task ID" }
+	END_VAR
+
+        VAR
+ABf : STRING[ 256 ];	{ DE:"Auxiliary buffer" }
+CaseBk : USINT;	{ DE:"Case back" }
+CaseNr : USINT;	{ DE:"Case gestione" }
+ETPtr : @BYTE;	{ DE:"Expected TAG pointer" }
+ErrorNr : USINT;	{ DE:"Error number" }
+RxChrs : UINT;	{ DE:"Received chars" }
+QRPtr : @BYTE;	{ DE:"Question request pointer" }
+TCPClient : SysTCPClient;	{ DE:"TCP client" }
+TimeBf : ARRAY[ 0..2 ] OF UDINT;	{ DE:"Time buffer (uS)" }
+i : UDINT;	{ DE:"Auxiliary counter" }
+ScanfAdd : UDINT;	{ DE:"Scanf address" }
+ScanfData : BYTE;	{ DE:"Scanf data" }
+CSPulse : ARRAY[ 0..1 ] OF BOOL;	{ DE:"Code send pulse" }
+RxDLength : UDINT;	{ DE:"Rx string length" }
+	END_VAR
+
+END_FUNCTION_BLOCK
+
+005BA1C8  E92D 4040		stmdb sp!, { r6, lr }
+005BA1CC  462E     		mov r6, r5
+
+#0		{SRC:RFBridgeInterface}
+#1		(*$WAITSWITCH$*)
+#2		
+#3			(* Fault:=FALSE; *)
+#4			MOVE		FALSE,Fault	{LNXT:62|63|-1}
+(*) 
+005BA1CE  2000     		mov r0, #0 ; 0
+005BA1D0  F8DF 7888		ldr r7, [pc, #+2184] ; 0x171
+005BA1D4  55F0     		strb r0, [r6, +r7]
+
+#5		
+#6			(* SensorOk:=FALSE; *)
+#7			MOVE		FALSE,SensorOk	{LNXT:63|64|-1}
+(*) BOOL
+005BA1D6  2000     		mov r0, #0 ; 0
+005BA1D8  F8DF 7884		ldr r7, [pc, #+2180] ; 0x172
+005BA1DC  55F0     		strb r0, [r6, +r7]
+
+#8		
+#9		
+#10			(* IF SysActTaskID <> ID_TASK_BACK *)
+#11			LD		SysActTaskID	{LNXT:64|-1|-1}
+(*) UNDEF
+005BA1DE  F8DF 791C		ldr r7, [pc, #+2332] ; 0x20419D74
+005BA1E2  7838     		ldrb r0, [r7]
+
+#12			NE		ID_TASK_BACK	{LNXT:64|-1|-1}
+(*) USINT
+005BA1E4  2801     		cmp r0, #1
+005BA1E6  BF08 2000		eqmov r0, #0
+005BA1EA  BF18 2001		nemov r0, #1
+
+#13			JMPCN	$label0	{LNXT:64|64|65}
+(-) BOOL
+005BA1EE  2800     		cmp r0, #0
+005BA1F0  D006     		beq #12 ; 0x005BA200
+
+
+#14		
+#15			(* THEN *)
+#16		
+#17				(* Fault:=TRUE; *)
+#18				MOVE		TRUE,Fault	{LNXT:64|64|-1}
+(*) BOOL
+005BA1F4  2001     		mov r0, #1 ; 1
+005BA1F6  F8DF 7864		ldr r7, [pc, #+2148] ; 0x171
+005BA1FA  55F0     		strb r0, [r6, +r7]
+
+#19		
+#20				(* RETURN *)
+#21				RET
+#22		
+(-) BOOL
+005BA1FC  F001 B86A		b #4308 ; 0x005BB2D4
+
+
+#23		$label0:
+#24			(* END_IF *)
+#25		
+#26			(* ; *)
+#27			CAL		TCPClient	{LNXT:65|69|-1}
+(*) BOOL
+005BA200  E92D 0021		stmdb sp!, { r0, r5 }
+005BA204  F8DF 77E8		ldr r7, [pc, #+2024] ; 0x110
+005BA208  19F0     		add r0, r6, r7
+005BA20A  F8DF 4878		ldr r4, [pc, #+2168] ; 0x496CD5
+005BA20E  F044 0401		orr r4, r4, #1
+005BA212  47A0     		blx r4
+005BA214  E8BD 0021		ldmia sp!, { r0, r5 }
+
+#28		
+#29		
+#30			(* IF CSend <> CSPulse[0]) *)
+#31			LD		CSend	{LNXT:69|-1|-1}
+(*) UNDEF
+005BA218  F8DF 782C		ldr r7, [pc, #+2092] ; 0x156
+005BA21C  5DF0     		ldrb r0, [r6, +r7]
+
+#32			NE		CSPulse[0]	{LNXT:69|-1|-1}
+(*) BOOL
+005BA21E  F8DF 7814		ldr r7, [pc, #+2068] ; 0x14D
+005BA222  5DF7     		ldrb r7, [r6, +r7]
+005BA224  42B8     		cmp r0, r7
+005BA226  BF08 2000		eqmov r0, #0
+005BA22A  BF18 2001		nemov r0, #1
+
+#33			JMPCN	$label1	{LNXT:69|70|76}
+(-) BOOL
+005BA22E  2800     		cmp r0, #0
+005BA230  D010     		beq #32 ; 0x005BA254
+
+
+#34		
+#35			(* THEN *)
+#36		
+#37				(* CSPulse[0]:=CSend; *)
+#38				MOVE		CSend,CSPulse[0]	{LNXT:70|71|-1}
+(*) BOOL
+005BA234  F8DF 7810		ldr r7, [pc, #+2064] ; 0x156
+005BA238  5DF0     		ldrb r0, [r6, +r7]
+005BA23A  F8DF 77F8		ldr r7, [pc, #+2040] ; 0x14D
+005BA23E  55F0     		strb r0, [r6, +r7]
+
+#39		
+#40		
+#41				(* IF CSend *)
+#42				LD		CSend	{LNXT:71|-1|-1}
+(*) UNDEF
+005BA240  F8DF 7804		ldr r7, [pc, #+2052] ; 0x156
+005BA244  5DF0     		ldrb r0, [r6, +r7]
+
+#43				JMPCN	$label2	{LNXT:71|71|76}
+(-) BOOL
+005BA246  2800     		cmp r0, #0
+005BA248  D004     		beq #8 ; 0x005BA254
+
+
+#44		
+#45				(* THEN *)
+#46		
+#47					(* CSPulse[1]:=TRUE; *)
+#48					MOVE		TRUE,CSPulse[1]	{LNXT:71|76|-1}
+(*) BOOL
+005BA24C  2001     		mov r0, #1 ; 1
+005BA24E  F8DF 77E8		ldr r7, [pc, #+2024] ; 0x14E
+005BA252  55F0     		strb r0, [r6, +r7]
+
+#49		
+#50		$label2:
+#51				(* END_IF *)
+#52		
+#53		$label1:
+#54			(* END_IF *)
+#55		
+#56		
+#57			(* IF SpyOn *)
+#58			LD		SpyOn	{LNXT:76|-1|-1}
+(*) UNDEF
+005BA254  F8DF 77EC		ldr r7, [pc, #+2028] ; 0x155
+005BA258  5DF0     		ldrb r0, [r6, +r7]
+
+#59			JMPCN	$label3	{LNXT:76|76|83}
+(-) BOOL
+005BA25A  2800     		cmp r0, #0
+005BA25C  D014     		beq #40 ; 0x005BA288
+
+
+#60		
+#61			(* THEN *)
+#62		
+#63		
+#64				(* IF 0, 0, 0, 0)) *)
+#65				LD		0	{LNXT:76|-1|-1}
+(-) UNDEF
+005BA260  2000     		mov r0, #0 ; 0
+
+#66				SysSpyData		0, 0, 0	{LNXT:76|-1|-1}
+(-) USINT
+005BA262  2300     		mov r3, #0 ; 0
+005BA264  2200     		mov r2, #0 ; 0
+005BA266  2100     		mov r1, #0 ; 0
+005BA268  4600     		mov r0, r0
+005BA26A  F8DF 4828		ldr r4, [pc, #+2088] ; 0x497F99
+005BA26E  F044 0401		orr r4, r4, #1
+005BA272  47A0     		blx r4
+
+#67				NOT	{LNXT:76|-1|-1}
+(*) BOOL
+005BA274  2800     		cmp r0, #0
+005BA276  BF08 2001		eqmov r0, #1
+005BA27A  BF18 2000		nemov r0, #0
+
+#68				JMPCN	$label4	{LNXT:76|76|83}
+(-) BOOL
+005BA27E  2800     		cmp r0, #0
+005BA280  D002     		beq #4 ; 0x005BA288
+
+
+#69		
+#70				(* THEN *)
+#71		
+#72					(* RETURN *)
+#73					RET
+#74		
+(-) BOOL
+005BA284  F001 B826		b #4172 ; 0x005BB2D4
+
+
+#75		$label4:
+#76				(* END_IF *)
+#77		
+#78		$label3:
+#79			(* END_IF *)
+#80		
+#81		
+#82			(* IF ErrorNr <> 0 *)
+#83			LD		ErrorNr	{LNXT:83|-1|-1}
+(*) UNDEF
+005BA288  F8DF 775C		ldr r7, [pc, #+1884] ; 0x108
+005BA28C  5DF0     		ldrb r0, [r6, +r7]
+
+#84			NE		0	{LNXT:83|-1|-1}
+(*) USINT
+005BA28E  2800     		cmp r0, #0
+005BA290  BF08 2000		eqmov r0, #0
+005BA294  BF18 2001		nemov r0, #1
+
+#85			JMPCN	$label5	{LNXT:83|84|106}
+(-) BOOL
+005BA298  2800     		cmp r0, #0
+005BA29A  D07A     		beq #244 ; 0x005BA392
+
+
+#86		
+#87			(* THEN *)
+#88		
+#89		
+#90				(* IF SpyOn *)
+#91				LD		SpyOn	{LNXT:84|-1|-1}
+(*) UNDEF
+005BA29E  F8DF 77A4		ldr r7, [pc, #+1956] ; 0x155
+005BA2A2  5DF0     		ldrb r0, [r6, +r7]
+
+#92				JMPCN	$label6	{LNXT:84|85|92}
+(-) BOOL
+005BA2A4  2800     		cmp r0, #0
+005BA2A6  D057     		beq #174 ; 0x005BA358
+
+
+#93		
+#94				(* THEN *)
+#95		
+#96					(* i:=TO_UINT(SysVarsnprintf(ADR(ABf), SIZEOF(ABf), 'Error:%d', USINT_TYPE, ADR(ErrorNr))); *)
+#97					ADR		ErrorNr	{LNXT:85|86|-1}
+(*) BOOL
+005BA2AA  F8DF 773C		ldr r7, [pc, #+1852] ; 0x108
+005BA2AE  19F0     		add r0, r6, r7
+
+#98					ST		$$TMP1	{LNXT:85|86|-1}
+(*) DWORD
+005BA2B0  F8DF 77BC		ldr r7, [pc, #+1980] ; 0x18C
+005BA2B4  51F0     		str r0, [r6, +r7]
+
+#99					ADR		ABf	{LNXT:85|86|-1}
+(-) DWORD
+005BA2B6  4630     		mov r0, r6
+
+#100					SysVarsnprintf		SIZE#ABf, 'Error:%d', USINT_TYPE, $$TMP1	{LNXT:85|86|-1}
+(-) DWORD
+005BA2B8  B082     		sub sp, sp, #8
+005BA2BA  F8DF 77B4		ldr r7, [pc, #+1972] ; 0x18C
+005BA2BE  59F7     		ldr r7, [r6, +r7]
+005BA2C0  F8CD 7000		str r7, [sp]
+005BA2C4  2316     		mov r3, #22 ; 22
+005BA2C6  F8DF 77E0		ldr r7, [pc, #+2016] ; 0x5BA084
+005BA2CA  463A     		mov r2, r7
+005BA2CC  F8DF 7824		ldr r7, [pc, #+2084] ; 0x5BA180
+005BA2D0  6839     		ldr r1, [r7]
+005BA2D2  4600     		mov r0, r0
+005BA2D4  F8DF 47B0		ldr r4, [pc, #+1968] ; 0x497AD9
+005BA2D8  F044 0401		orr r4, r4, #1
+005BA2DC  47A0     		blx r4
+005BA2DE  B002     		add sp, sp, #8
+
+#101					TO_UINT	{LNXT:85|86|-1}
+(-) INT
+#102					ST		i	{LNXT:85|86|-1}
+(*) UINT
+005BA2E0  F8DF 7744		ldr r7, [pc, #+1860] ; 0x144
+005BA2E4  51F0     		str r0, [r6, +r7]
+
+#103		
+#104					(* i:=TO_UINT(SysLWVarsnprintf(ADR(ABf), SIZEOF(ABf), ', on case:%d', USINT_TYPE, ADR(CaseNr))); *)
+#105					ADR		CaseNr	{LNXT:86|87|-1}
+(*) UINT
+005BA2E6  F8DF 76F8		ldr r7, [pc, #+1784] ; 0x102
+005BA2EA  19F0     		add r0, r6, r7
+
+#106					ST		$$TMP1	{LNXT:86|87|-1}
+(*) DWORD
+005BA2EC  F8DF 7780		ldr r7, [pc, #+1920] ; 0x18C
+005BA2F0  51F0     		str r0, [r6, +r7]
+
+#107					ADR		ABf	{LNXT:86|87|-1}
+(-) DWORD
+005BA2F2  4630     		mov r0, r6
+
+#108					SysLWVarsnprintf		SIZE#ABf, ', on case:%d', USINT_TYPE, $$TMP1	{LNXT:86|87|-1}
+(-) DWORD
+005BA2F4  B082     		sub sp, sp, #8
+005BA2F6  F8DF 7778		ldr r7, [pc, #+1912] ; 0x18C
+005BA2FA  59F7     		ldr r7, [r6, +r7]
+005BA2FC  F8CD 7000		str r7, [sp]
+005BA300  2316     		mov r3, #22 ; 22
+005BA302  F8DF 77A8		ldr r7, [pc, #+1960] ; 0x5BA090
+005BA306  463A     		mov r2, r7
+005BA308  F8DF 77EC		ldr r7, [pc, #+2028] ; 0x5BA184
+005BA30C  6839     		ldr r1, [r7]
+005BA30E  4600     		mov r0, r0
+005BA310  F8DF 4778		ldr r4, [pc, #+1912] ; 0x497C85
+005BA314  F044 0401		orr r4, r4, #1
+005BA318  47A0     		blx r4
+005BA31A  B002     		add sp, sp, #8
+
+#109					TO_UINT	{LNXT:86|87|-1}
+(-) INT
+#110					ST		i	{LNXT:86|87|-1}
+(*) UINT
+005BA31C  F8DF 7708		ldr r7, [pc, #+1800] ; 0x144
+005BA320  51F0     		str r0, [r6, +r7]
+
+#111		
+#112					(* i:=SysSpyData(SPY_ASCII, 16#40000000, ADR('Er'), ADR(ABf)); *)
+#113					ADR		'Er'	{LNXT:87|92|-1}
+(*) UINT
+005BA322  F8DF 078C		ldr r0, [pc, #+1932] ; 0x5BA0A0
+
+#114					ST		$$TMP4	{LNXT:87|92|-1}
+(*) DWORD
+005BA326  F8DF 774C		ldr r7, [pc, #+1868] ; 0x190
+005BA32A  51F0     		str r0, [r6, +r7]
+
+#115					ADR		ABf	{LNXT:87|92|-1}
+(-) DWORD
+005BA32C  4630     		mov r0, r6
+
+#116					ST		$$TMP5	{LNXT:87|92|-1}
+(*) DWORD
+005BA32E  F8DF 7748		ldr r7, [pc, #+1864] ; 0x194
+005BA332  51F0     		str r0, [r6, +r7]
+
+#117					LD		SPY_ASCII	{LNXT:87|92|-1}
+(-) UNDEF
+005BA334  2001     		mov r0, #1 ; 1
+
+#118					SysSpyData		16#40000000, $$TMP4, $$TMP5	{LNXT:87|92|-1}
+(-) USINT
+005BA336  F8DF 7740		ldr r7, [pc, #+1856] ; 0x194
+005BA33A  59F3     		ldr r3, [r6, +r7]
+005BA33C  F8DF 7734		ldr r7, [pc, #+1844] ; 0x190
+005BA340  59F2     		ldr r2, [r6, +r7]
+005BA342  F04F 4180		mov r1, #1073741824 ; 1073741824
+005BA346  4600     		mov r0, r0
+005BA348  F8DF 4748		ldr r4, [pc, #+1864] ; 0x497F99
+005BA34C  F044 0401		orr r4, r4, #1
+005BA350  47A0     		blx r4
+
+#119					ST		i	{LNXT:87|92|-1}
+(*) BOOL
+005BA352  F8DF 76D4		ldr r7, [pc, #+1748] ; 0x144
+005BA356  51F0     		str r0, [r6, +r7]
+
+#120		
+#121		$label6:
+#122				(* END_IF *)
+#123		
+#124				(* Fault:=TRUE; *)
+#125				MOVE		TRUE,Fault	{LNXT:92|93|-1}
+(*) UDINT
+005BA358  2001     		mov r0, #1 ; 1
+005BA35A  F8DF 7700		ldr r7, [pc, #+1792] ; 0x171
+005BA35E  55F0     		strb r0, [r6, +r7]
+
+#126		
+#127				(* CaseNr:=0; *)
+#128				MOVE		0,CaseNr	{LNXT:93|94|-1}
+(*) BOOL
+005BA360  2000     		mov r0, #0 ; 0
+005BA362  F8DF 767C		ldr r7, [pc, #+1660] ; 0x102
+005BA366  55F0     		strb r0, [r6, +r7]
+
+#129		
+#130				(* ErrorNr:=0; *)
+#131				MOVE		0,ErrorNr	{LNXT:94|95|-1}
+(*) USINT
+005BA368  2000     		mov r0, #0 ; 0
+005BA36A  F8DF 767C		ldr r7, [pc, #+1660] ; 0x108
+005BA36E  55F0     		strb r0, [r6, +r7]
+
+#132		
+#133				(* ErrorCtr:=ErrorCtr+1; *)
+#134				LD		ErrorCtr	{LNXT:95|96|-1}
+(*) UNDEF
+005BA370  F8DF 76F0		ldr r7, [pc, #+1776] ; 0x174
+005BA374  5BF0     		ldrh r0, [r6, +r7]
+
+#135				ADD		1	{LNXT:95|96|-1}
+(-) UINT
+005BA376  1C40     		add r0, r0, #1
+
+#136				ST		ErrorCtr	{LNXT:95|96|-1}
+(*) UINT
+005BA378  F8DF 76E8		ldr r7, [pc, #+1768] ; 0x174
+005BA37C  53F0     		strh r0, [r6, +r7]
+
+#137		
+#138				(* Connected:=FALSE; *)
+#139				MOVE		FALSE,Connected	{LNXT:96|97|-1}
+(*) UINT
+005BA37E  2000     		mov r0, #0 ; 0
+005BA380  F8DF 76D4		ldr r7, [pc, #+1748] ; 0x170
+005BA384  55F0     		strb r0, [r6, +r7]
+
+#140		
+#141				(* TCPClient.Connect:=FALSE; *)
+#142				MOVE		FALSE,TCPClient.Connect	{LNXT:97|98|-1}
+(*) BOOL
+005BA386  2000     		mov r0, #0 ; 0
+005BA388  F8DF 7668		ldr r7, [pc, #+1640] ; 0x118
+005BA38C  55F0     		strb r0, [r6, +r7]
+
+#143		
+#144				(* RETURN *)
+#145				RET
+#146		
+(-) BOOL
+005BA38E  F000 BFA1		b #3906 ; 0x005BB2D4
+
+
+#147		$label5:
+#148			(* END_IF *)
+#149		
+#150		
+#151			(* IF Enable) *)
+#152			LD		Enable	{LNXT:106|-1|-1}
+(*) UNDEF
+005BA392  F8DF 76AC		ldr r7, [pc, #+1708] ; 0x154
+005BA396  5DF0     		ldrb r0, [r6, +r7]
+
+#153			NOT	{LNXT:106|-1|-1}
+(*) BOOL
+005BA398  2800     		cmp r0, #0
+005BA39A  BF08 2001		eqmov r0, #1
+005BA39E  BF18 2000		nemov r0, #0
+
+#154			JMPCN	$label7	{LNXT:106|107|116}
+(-) BOOL
+005BA3A2  2800     		cmp r0, #0
+005BA3A4  D012     		beq #36 ; 0x005BA3CC
+
+
+#155		
+#156			(* THEN *)
+#157		
+#158				(* CaseNr:=0; *)
+#159				MOVE		0,CaseNr	{LNXT:107|108|-1}
+(*) BOOL
+005BA3A8  2000     		mov r0, #0 ; 0
+005BA3AA  F8DF 7634		ldr r7, [pc, #+1588] ; 0x102
+005BA3AE  55F0     		strb r0, [r6, +r7]
+
+#160		
+#161				(* Connected:=FALSE; *)
+#162				MOVE		FALSE,Connected	{LNXT:108|109|-1}
+(*) USINT
+005BA3B0  2000     		mov r0, #0 ; 0
+005BA3B2  F8DF 76A4		ldr r7, [pc, #+1700] ; 0x170
+005BA3B6  55F0     		strb r0, [r6, +r7]
+
+#163		
+#164				(* CSPulse[0]:=FALSE; *)
+#165				MOVE		FALSE,CSPulse[0]	{LNXT:109|110|-1}
+(*) BOOL
+005BA3B8  2000     		mov r0, #0 ; 0
+005BA3BA  F8DF 7678		ldr r7, [pc, #+1656] ; 0x14D
+005BA3BE  55F0     		strb r0, [r6, +r7]
+
+#166		
+#167				(* CSPulse[1]:=FALSE; *)
+#168				MOVE		FALSE,CSPulse[1]	{LNXT:110|111|-1}
+(*) BOOL
+005BA3C0  2000     		mov r0, #0 ; 0
+005BA3C2  F8DF 7674		ldr r7, [pc, #+1652] ; 0x14E
+005BA3C6  55F0     		strb r0, [r6, +r7]
+
+#169		
+#170				(* RETURN *)
+#171				RET
+#172		
+(-) BOOL
+005BA3C8  F000 BF84		b #3848 ; 0x005BB2D4
+
+
+#173		$label7:
+#174			(* END_IF *)
+#175		
+#176			(* TCPClient.PeerAdd:=DeviceIP; *)
+#177			MOVE		DeviceIP,TCPClient.PeerAdd	{LNXT:116|117|-1}
+(*) BOOL
+005BA3CC  F8DF 767C		ldr r7, [pc, #+1660] ; 0x158
+005BA3D0  59F0     		ldr r0, [r6, +r7]
+005BA3D2  F8DF 7624		ldr r7, [pc, #+1572] ; 0x11C
+005BA3D6  51F0     		str r0, [r6, +r7]
+
+#178		
+#179			(* TCPClient.PeerPort:=DevicePort; *)
+#180			MOVE		DevicePort,TCPClient.PeerPort	{LNXT:117|118|-1}
+(*) @USINT
+005BA3D8  F8DF 7674		ldr r7, [pc, #+1652] ; 0x15C
+005BA3DC  5BF0     		ldrh r0, [r6, +r7]
+005BA3DE  F8DF 761C		ldr r7, [pc, #+1564] ; 0x120
+005BA3E2  53F0     		strh r0, [r6, +r7]
+
+#181		
+#182			(* TCPClient.LocalAdd:=ADR('0.0.0.0'); *)
+#183			ADR		'0.0.0.0'	{LNXT:118|119|-1}
+(*) UINT
+005BA3E4  F8DF 06CC		ldr r0, [pc, #+1740] ; 0x5BA0A4
+
+#184			ST		TCPClient.LocalAdd	{LNXT:118|119|-1}
+(*) DWORD
+005BA3E8  F8DF 7614		ldr r7, [pc, #+1556] ; 0x124
+005BA3EC  51F0     		str r0, [r6, +r7]
+
+#185		
+#186			(* TCPClient.LocalPort:=0; *)
+#187			MOVE		0,TCPClient.LocalPort	{LNXT:119|120|-1}
+(*) DWORD
+005BA3EE  2000     		mov r0, #0 ; 0
+005BA3F0  F8DF 7610		ldr r7, [pc, #+1552] ; 0x128
+005BA3F4  53F0     		strh r0, [r6, +r7]
+
+#188		
+#189			(* TCPClient.LifeTm:=60; *)
+#190			MOVE		60,TCPClient.LifeTm	{LNXT:120|121|-1}
+(*) UINT
+005BA3F6  203C     		mov r0, #60 ; 60
+005BA3F8  F8DF 7610		ldr r7, [pc, #+1552] ; 0x12C
+005BA3FC  53F0     		strh r0, [r6, +r7]
+
+#191		
+#192			(* TCPClient.FlushTm:=10; *)
+#193			MOVE		10,TCPClient.FlushTm	{LNXT:121|122|-1}
+(*) UINT
+005BA3FE  200A     		mov r0, #10 ; 10
+005BA400  F8DF 7604		ldr r7, [pc, #+1540] ; 0x12A
+005BA404  53F0     		strh r0, [r6, +r7]
+
+#194		
+#195			(* TCPClient.RxSize:=256; *)
+#196			MOVE		256,TCPClient.RxSize	{LNXT:122|123|-1}
+(*) UINT
+005BA406  F44F 7080		mov r0, #256 ; 256
+005BA40A  F8DF 7604		ldr r7, [pc, #+1540] ; 0x12E
+005BA40E  53F0     		strh r0, [r6, +r7]
+
+#197		
+#198			(* TCPClient.TxSize:=256; *)
+#199			MOVE		256,TCPClient.TxSize	{LNXT:123|124|-1}
+(*) UINT
+005BA410  F44F 7080		mov r0, #256 ; 256
+005BA414  F8DF 75FC		ldr r7, [pc, #+1532] ; 0x130
+005BA418  53F0     		strh r0, [r6, +r7]
+
+#200		
+#201			(* TCPClient.Connect:=TRUE; *)
+#202			MOVE		TRUE,TCPClient.Connect	{LNXT:124|131|-1}
+(*) UINT
+005BA41A  2001     		mov r0, #1 ; 1
+005BA41C  F8DF 75D4		ldr r7, [pc, #+1492] ; 0x118
+005BA420  55F0     		strb r0, [r6, +r7]
+
+#203		
+#204		
+#205			(* IF CaseNr = 0 *)
+#206			LD		CaseNr	{LNXT:131|-1|-1}
+(*) UNDEF
+005BA422  F8DF 75BC		ldr r7, [pc, #+1468] ; 0x102
+005BA426  5DF0     		ldrb r0, [r6, +r7]
+
+#207			EQ		0	{LNXT:131|-1|-1}
+(*) USINT
+005BA428  2800     		cmp r0, #0
+005BA42A  BF18 2000		nemov r0, #0
+005BA42E  BF08 2001		eqmov r0, #1
+
+#208			JMPCN	$label8	{LNXT:131|131|132}
+(-) BOOL
+005BA432  2800     		cmp r0, #0
+005BA434  D00A     		beq #20 ; 0x005BA44C
+
+
+#209		
+#210			(* THEN *)
+#211		
+#212				(* TimeBf[0]:=SysGetSysTime(TRUE); *)
+#213				LD		TRUE	{LNXT:131|132|-1}
+(-) UNDEF
+005BA438  2001     		mov r0, #1 ; 1
+
+#214				SysGetSysTime	{LNXT:131|132|-1}
+(-) BOOL
+005BA43A  4600     		mov r0, r0
+005BA43C  F8DF 4658		ldr r4, [pc, #+1624] ; 0x4986AD
+005BA440  F044 0401		orr r4, r4, #1
+005BA444  47A0     		blx r4
+
+#215				ST		TimeBf[0]	{LNXT:131|132|-1}
+(*) UDINT
+005BA446  F8DF 75D8		ldr r7, [pc, #+1496] ; 0x138
+005BA44A  51F0     		str r0, [r6, +r7]
+
+#216		
+#217		$label8:
+#218			(* END_IF *)
+#219		
+#220		
+#221			(* IF TRUE)-TimeBf[0]) > 1000000 *)
+#222			LD		TRUE	{LNXT:132|-1|-1}
+(-) UNDEF
+005BA44C  2001     		mov r0, #1 ; 1
+
+#223			SysGetSysTime	{LNXT:132|-1|-1}
+(-) BOOL
+005BA44E  4600     		mov r0, r0
+005BA450  F8DF 4644		ldr r4, [pc, #+1604] ; 0x4986AD
+005BA454  F044 0401		orr r4, r4, #1
+005BA458  47A0     		blx r4
+
+#224			SUB		TimeBf[0]	{LNXT:132|-1|-1}
+(*) UDINT
+005BA45A  F8DF 75C4		ldr r7, [pc, #+1476] ; 0x138
+005BA45E  59F7     		ldr r7, [r6, +r7]
+005BA460  1BC0     		sub r0, r0, r7
+
+#225			GT		1000000	{LNXT:132|-1|-1}
+(*) UDINT
+005BA462  F8DF 7654		ldr r7, [pc, #+1620] ; 0x5BA0AC
+005BA466  683F     		ldr r7, [r7]
+005BA468  42B8     		cmp r0, r7
+005BA46A  BF98 2000		lsmov r0, #0
+005BA46E  BF88 2001		himov r0, #1
+
+#226			JMPCN	$label9	{LNXT:132|132|140}
+(-) BOOL
+005BA472  2800     		cmp r0, #0
+005BA474  D006     		beq #12 ; 0x005BA484
+
+
+#227		
+#228			(* THEN *)
+#229		
+#230				(* ErrorNr:=100; *)
+#231				MOVE		100,ErrorNr	{LNXT:132|132|-1}
+(*) BOOL
+005BA478  2064     		mov r0, #100 ; 100
+005BA47A  F8DF 756C		ldr r7, [pc, #+1388] ; 0x108
+005BA47E  55F0     		strb r0, [r6, +r7]
+
+#232		
+#233				(* RETURN *)
+#234				RET
+#235		
+(-) USINT
+005BA480  F000 BF28		b #3664 ; 0x005BB2D4
+
+
+#236		$label9:
+#237			(* END_IF *)
+#238		
+#239		
+#240			(* CASE CaseNr OF *)
+#241		
+#242			(* 0: *)
+#243			LD		CaseNr	{LNXT:146|-1|-1}
+(*) UNDEF
+005BA484  F8DF 7558		ldr r7, [pc, #+1368] ; 0x102
+005BA488  5DF0     		ldrb r0, [r6, +r7]
+
+#244			EQ		0	{LNXT:146|-1|-1}
+(*) USINT
+005BA48A  2800     		cmp r0, #0
+005BA48C  BF18 2000		nemov r0, #0
+005BA490  BF08 2001		eqmov r0, #1
+
+#245			JMPC		$label11	{LNXT:146|147|158}
+(-) BOOL
+005BA494  2800     		cmp r0, #0
+005BA496  F040 8091		bne #290 ; 0x005BA5BC
+
+
+#246		
+#247			(* 10: *)
+#248			LD		CaseNr	{LNXT:158|-1|-1}
+(*) UNDEF
+005BA49A  F8DF 7544		ldr r7, [pc, #+1348] ; 0x102
+005BA49E  5DF0     		ldrb r0, [r6, +r7]
+
+#249			EQ		10	{LNXT:158|-1|-1}
+(*) USINT
+005BA4A0  280A     		cmp r0, #10
+005BA4A2  BF18 2000		nemov r0, #0
+005BA4A6  BF08 2001		eqmov r0, #1
+
+#250			JMPC		$label12	{LNXT:158|159|168}
+(-) BOOL
+005BA4AA  2800     		cmp r0, #0
+005BA4AC  F040 80E6		bne #460 ; 0x005BA67C
+
+
+#251		
+#252			(* 11: *)
+#253			LD		CaseNr	{LNXT:168|-1|-1}
+(*) UNDEF
+005BA4B0  F8DF 752C		ldr r7, [pc, #+1324] ; 0x102
+005BA4B4  5DF0     		ldrb r0, [r6, +r7]
+
+#254			EQ		11	{LNXT:168|-1|-1}
+(*) USINT
+005BA4B6  280B     		cmp r0, #11
+005BA4B8  BF18 2000		nemov r0, #0
+005BA4BC  BF08 2001		eqmov r0, #1
+
+#255			JMPC		$label13	{LNXT:168|169|177}
+(-) BOOL
+005BA4C0  2800     		cmp r0, #0
+005BA4C2  F040 8108		bne #528 ; 0x005BA6D6
+
+
+#256		
+#257			(* 50: *)
+#258			LD		CaseNr	{LNXT:177|-1|-1}
+(*) UNDEF
+005BA4C6  F8DF 7518		ldr r7, [pc, #+1304] ; 0x102
+005BA4CA  5DF0     		ldrb r0, [r6, +r7]
+
+#259			EQ		50	{LNXT:177|-1|-1}
+(*) USINT
+005BA4CC  2832     		cmp r0, #50
+005BA4CE  BF18 2000		nemov r0, #0
+005BA4D2  BF08 2001		eqmov r0, #1
+
+#260			JMPC		$label14	{LNXT:177|178|193}
+(-) BOOL
+005BA4D6  2800     		cmp r0, #0
+005BA4D8  F040 8107		bne #526 ; 0x005BA6EA
+
+
+#261		
+#262			(* 51: *)
+#263			LD		CaseNr	{LNXT:193|-1|-1}
+(*) UNDEF
+005BA4DC  F8DF 7500		ldr r7, [pc, #+1280] ; 0x102
+005BA4E0  5DF0     		ldrb r0, [r6, +r7]
+
+#264			EQ		51	{LNXT:193|-1|-1}
+(*) USINT
+005BA4E2  2833     		cmp r0, #51
+005BA4E4  BF18 2000		nemov r0, #0
+005BA4E8  BF08 2001		eqmov r0, #1
+
+#265			JMPC		$label15	{LNXT:193|194|206}
+(-) BOOL
+005BA4EC  2800     		cmp r0, #0
+005BA4EE  F040 8113		bne #550 ; 0x005BA718
+
+
+#266		
+#267			(* 52: *)
+#268			LD		CaseNr	{LNXT:206|-1|-1}
+(*) UNDEF
+005BA4F2  F8DF 74EC		ldr r7, [pc, #+1260] ; 0x102
+005BA4F6  5DF0     		ldrb r0, [r6, +r7]
+
+#269			EQ		52	{LNXT:206|-1|-1}
+(*) USINT
+005BA4F8  2834     		cmp r0, #52
+005BA4FA  BF18 2000		nemov r0, #0
+005BA4FE  BF08 2001		eqmov r0, #1
+
+#270			JMPC		$label16	{LNXT:206|207|225}
+(-) BOOL
+005BA502  2800     		cmp r0, #0
+005BA504  F040 81B5		bne #874 ; 0x005BA872
+
+
+#271		
+#272			(* 53: *)
+#273			LD		CaseNr	{LNXT:225|-1|-1}
+(*) UNDEF
+005BA508  F8DF 74D4		ldr r7, [pc, #+1236] ; 0x102
+005BA50C  5DF0     		ldrb r0, [r6, +r7]
+
+#274			EQ		53	{LNXT:225|-1|-1}
+(*) USINT
+005BA50E  2835     		cmp r0, #53
+005BA510  BF18 2000		nemov r0, #0
+005BA514  BF08 2001		eqmov r0, #1
+
+#275			JMPC		$label17	{LNXT:225|226|326}
+(-) BOOL
+005BA518  2800     		cmp r0, #0
+005BA51A  F040 81C1		bne #898 ; 0x005BA8A0
+
+
+#276		
+#277			(* 100: *)
+#278			LD		CaseNr	{LNXT:326|-1|-1}
+(*) UNDEF
+005BA51E  F8DF 74C0		ldr r7, [pc, #+1216] ; 0x102
+005BA522  5DF0     		ldrb r0, [r6, +r7]
+
+#279			EQ		100	{LNXT:326|-1|-1}
+(*) USINT
+005BA524  2864     		cmp r0, #100
+005BA526  BF18 2000		nemov r0, #0
+005BA52A  BF08 2001		eqmov r0, #1
+
+#280			JMPC		$label18	{LNXT:326|327|341}
+(-) BOOL
+005BA52E  2800     		cmp r0, #0
+005BA530  F040 8460		bne #2240 ; 0x005BADF4
+
+
+#281		
+#282			(* 101: *)
+#283			LD		CaseNr	{LNXT:341|-1|-1}
+(*) UNDEF
+005BA534  F8DF 74A8		ldr r7, [pc, #+1192] ; 0x102
+005BA538  5DF0     		ldrb r0, [r6, +r7]
+
+#284			EQ		101	{LNXT:341|-1|-1}
+(*) USINT
+005BA53A  2865     		cmp r0, #101
+005BA53C  BF18 2000		nemov r0, #0
+005BA540  BF08 2001		eqmov r0, #1
+
+#285			JMPC		$label19	{LNXT:341|342|350}
+(-) BOOL
+005BA544  2800     		cmp r0, #0
+005BA546  F040 850F		bne #2590 ; 0x005BAF68
+
+
+#286		
+#287			(* 200: *)
+#288			LD		CaseNr	{LNXT:350|-1|-1}
+(*) UNDEF
+005BA54A  F8DF 7494		ldr r7, [pc, #+1172] ; 0x102
+005BA54E  5DF0     		ldrb r0, [r6, +r7]
+
+#289			EQ		200	{LNXT:350|-1|-1}
+(*) USINT
+005BA550  28C8     		cmp r0, #200
+005BA552  BF18 2000		nemov r0, #0
+005BA556  BF08 2001		eqmov r0, #1
+
+#290			JMPC		$label20	{LNXT:350|351|362}
+(-) BOOL
+005BA55A  2800     		cmp r0, #0
+005BA55C  F040 850E		bne #2588 ; 0x005BAF7C
+
+
+#291		
+#292			(* 201: *)
+#293			LD		CaseNr	{LNXT:362|-1|-1}
+(*) UNDEF
+005BA560  F8DF 747C		ldr r7, [pc, #+1148] ; 0x102
+005BA564  5DF0     		ldrb r0, [r6, +r7]
+
+#294			EQ		201	{LNXT:362|-1|-1}
+(*) USINT
+005BA566  28C9     		cmp r0, #201
+005BA568  BF18 2000		nemov r0, #0
+005BA56C  BF08 2001		eqmov r0, #1
+
+#295			JMPC		$label21	{LNXT:362|363|371}
+(-) BOOL
+005BA570  2800     		cmp r0, #0
+005BA572  F040 8579		bne #2802 ; 0x005BB068
+
+
+#296		
+#297			(* 220: *)
+#298			LD		CaseNr	{LNXT:371|-1|-1}
+(*) UNDEF
+005BA576  F8DF 7468		ldr r7, [pc, #+1128] ; 0x102
+005BA57A  5DF0     		ldrb r0, [r6, +r7]
+
+#299			EQ		220	{LNXT:371|-1|-1}
+(*) USINT
+005BA57C  28DC     		cmp r0, #220
+005BA57E  BF18 2000		nemov r0, #0
+005BA582  BF08 2001		eqmov r0, #1
+
+#300			JMPC		$label22	{LNXT:371|372|381}
+(-) BOOL
+005BA586  2800     		cmp r0, #0
+005BA588  F040 8598		bne #2864 ; 0x005BB0BC
+
+
+#301		
+#302			(* 221: *)
+#303			LD		CaseNr	{LNXT:381|-1|-1}
+(*) UNDEF
+005BA58C  F8DF 7450		ldr r7, [pc, #+1104] ; 0x102
+005BA590  5DF0     		ldrb r0, [r6, +r7]
+
+#304			EQ		221	{LNXT:381|-1|-1}
+(*) USINT
+005BA592  28DD     		cmp r0, #221
+005BA594  BF18 2000		nemov r0, #0
+005BA598  BF08 2001		eqmov r0, #1
+
+#305			JMPC		$label23	{LNXT:381|382|407}
+(-) BOOL
+005BA59C  2800     		cmp r0, #0
+005BA59E  F040 85C5		bne #2954 ; 0x005BB12C
+
+
+#306		
+#307			(* 222: *)
+#308			LD		CaseNr	{LNXT:407|-1|-1}
+(*) UNDEF
+005BA5A2  F8DF 743C		ldr r7, [pc, #+1084] ; 0x102
+005BA5A6  5DF0     		ldrb r0, [r6, +r7]
+
+#309			EQ		222	{LNXT:407|-1|-1}
+(*) USINT
+005BA5A8  28DE     		cmp r0, #222
+005BA5AA  BF18 2000		nemov r0, #0
+005BA5AE  BF08 2001		eqmov r0, #1
+
+#310			JMPC		$label24	{LNXT:407|408|-1}
+(-) BOOL
+005BA5B2  2800     		cmp r0, #0
+005BA5B4  F040 8668		bne #3280 ; 0x005BB288
+
+
+#311			JMP		$label10	{LNXT:407|408|-1}
+(-) BOOL
+005BA5B8  F000 BE8C		b #3352 ; 0x005BB2D4
+
+
+#312		
+#313			(* Istruzioni di ciascun CASE: *)
+#314		
+#315		$label11:
+#316		
+#317				(* IF Connected) *)
+#318				LD		Connected	{LNXT:147|-1|-1}
+(*) UNDEF
+005BA5BC  F8DF 7498		ldr r7, [pc, #+1176] ; 0x170
+005BA5C0  5DF0     		ldrb r0, [r6, +r7]
+
+#319				NOT	{LNXT:147|-1|-1}
+(*) BOOL
+005BA5C2  2800     		cmp r0, #0
+005BA5C4  BF08 2001		eqmov r0, #1
+005BA5C8  BF18 2000		nemov r0, #0
+
+#320				JMPCN	$label25	{LNXT:147|147|148}
+(-) BOOL
+005BA5CC  2800     		cmp r0, #0
+005BA5CE  D006     		beq #12 ; 0x005BA5DE
+
+
+#321		
+#322				(* THEN *)
+#323		
+#324					(* CaseNr:=10; *)
+#325					MOVE		10,CaseNr	{LNXT:147|147|-1}
+(*) BOOL
+005BA5D2  200A     		mov r0, #10 ; 10
+005BA5D4  F8DF 7408		ldr r7, [pc, #+1032] ; 0x102
+005BA5D8  55F0     		strb r0, [r6, +r7]
+
+#326		
+#327					(* RETURN *)
+#328					RET
+#329		
+(-) USINT
+005BA5DA  F000 BE7B		b #3318 ; 0x005BB2D4
+
+
+#330		$label25:
+#331				(* END_IF *)
+#332		
+#333		
+#334				(* IF CSPulse[1]) *)
+#335				LD		CSPulse[1]	{LNXT:148|-1|-1}
+(*) UNDEF
+005BA5DE  F8DF 7458		ldr r7, [pc, #+1112] ; 0x14E
+005BA5E2  5DF0     		ldrb r0, [r6, +r7]
+
+#336				JMPCN	$label26	{LNXT:148|148|149}
+(-) BOOL
+005BA5E4  2800     		cmp r0, #0
+005BA5E6  D006     		beq #12 ; 0x005BA5F6
+
+
+#337		
+#338				(* THEN *)
+#339		
+#340					(* CaseNr:=100; *)
+#341					MOVE		100,CaseNr	{LNXT:148|148|-1}
+(*) BOOL
+005BA5EA  2064     		mov r0, #100 ; 100
+005BA5EC  F8DF 73F0		ldr r7, [pc, #+1008] ; 0x102
+005BA5F0  55F0     		strb r0, [r6, +r7]
+
+#342		
+#343					(* RETURN *)
+#344					RET
+#345		
+(-) USINT
+005BA5F2  F000 BE6F		b #3294 ; 0x005BB2D4
+
+
+#346		$label26:
+#347				(* END_IF *)
+#348		
+#349		
+#350				(* IF TRUE)-TimeBf[1]) < TO_UDINT(PollTime*1000000.0 *)
+#351				LD		TRUE	{LNXT:149|-1|-1}
+(-) UNDEF
+005BA5F6  2001     		mov r0, #1 ; 1
+
+#352				SysGetSysTime	{LNXT:149|-1|-1}
+(-) BOOL
+005BA5F8  4600     		mov r0, r0
+005BA5FA  F8DF 449C		ldr r4, [pc, #+1180] ; 0x4986AD
+005BA5FE  F044 0401		orr r4, r4, #1
+005BA602  47A0     		blx r4
+
+#353				SUB		TimeBf[1]	{LNXT:149|-1|-1}
+(*) UDINT
+005BA604  F8DF 741C		ldr r7, [pc, #+1052] ; 0x13C
+005BA608  59F7     		ldr r7, [r6, +r7]
+005BA60A  1BC0     		sub r0, r0, r7
+
+#354				LT(		PollTime	{LNXT:149|-1|-1}
+(*) UDINT
+005BA60C  B082     		sub sp, sp, #8
+005BA60E  F8CD 0000		str r0, [sp]
+005BA612  F8DF 7440		ldr r7, [pc, #+1088] ; 0x160
+005BA616  59F0     		ldr r0, [r6, +r7]
+
+#355				MUL		1000000.0	{LNXT:149|-1|-1}
+(*) REAL
+005BA618  F8DF 74A0		ldr r7, [pc, #+1184] ; 0x5BA0B0
+005BA61C  683F     		ldr r7, [r7]
+005BA61E  B082     		sub sp, sp, #8
+005BA620  F8CD 1000		str r1, [sp]
+005BA624  4639     		mov r1, r7
+005BA626  F8DF 447C		ldr r4, [pc, #+1148] ; 0x4AE4E9
+005BA62A  F044 0401		orr r4, r4, #1
+005BA62E  47A0     		blx r4
+005BA630  F8DD 1000		ldr r1, [sp]
+005BA634  B002     		add sp, sp, #8
+
+#356				TO_UDINT	{LNXT:149|-1|-1}
+(*) REAL
+005BA636  F8DF 4468		ldr r4, [pc, #+1128] ; 0x4AE4A9
+005BA63A  F044 0401		orr r4, r4, #1
+005BA63E  47A0     		blx r4
+
+#357				)	{LNXT:149|-1|-1}
+(*) UDINT
+005BA640  4607     		mov r7, r0
+005BA642  F8DD 0000		ldr r0, [sp]
+005BA646  B002     		add sp, sp, #8
+005BA648  42B8     		cmp r0, r7
+005BA64A  BF28 2000		hsmov r0, #0
+005BA64E  BF38 2001		lomov r0, #1
+
+#358				JMPCN	$label27	{LNXT:149|149|150}
+(-) BOOL
+005BA652  2800     		cmp r0, #0
+005BA654  D002     		beq #4 ; 0x005BA65C
+
+
+#359		
+#360				(* THEN *)
+#361		
+#362					(* RETURN *)
+#363					RET
+#364		
+(-) BOOL
+005BA658  F000 BE3C		b #3192 ; 0x005BB2D4
+
+
+#365		$label27:
+#366				(* END_IF *)
+#367		
+#368				(* TimeBf[1]:=SysGetSysTime(TRUE); *)
+#369				LD		TRUE	{LNXT:150|151|-1}
+(-) UNDEF
+005BA65C  2001     		mov r0, #1 ; 1
+
+#370				SysGetSysTime	{LNXT:150|151|-1}
+(-) BOOL
+005BA65E  4600     		mov r0, r0
+005BA660  F8DF 4434		ldr r4, [pc, #+1076] ; 0x4986AD
+005BA664  F044 0401		orr r4, r4, #1
+005BA668  47A0     		blx r4
+
+#371				ST		TimeBf[1]	{LNXT:150|151|-1}
+(*) UDINT
+005BA66A  F8DF 73B8		ldr r7, [pc, #+952] ; 0x13C
+005BA66E  51F0     		str r0, [r6, +r7]
+
+#372		
+#373				(* CaseNr:=50; *)
+#374				MOVE		50,CaseNr	{LNXT:151|-1|-1}
+(*) UDINT
+005BA670  2032     		mov r0, #50 ; 50
+005BA672  F8DF 736C		ldr r7, [pc, #+876] ; 0x102
+005BA676  55F0     		strb r0, [r6, +r7]
+
+#375				JMP		$label10	{LNXT:1|-1|-1}
+(-) USINT
+005BA678  F000 BE2C		b #3160 ; 0x005BB2D4
+
+
+#376		
+#377		$label12:
+#378		
+#379				(* IF TCPClient.Connected) *)
+#380				LD		TCPClient.Connected	{LNXT:159|-1|-1}
+(*) UNDEF
+005BA67C  F8DF 7398		ldr r7, [pc, #+920] ; 0x132
+005BA680  5DF0     		ldrb r0, [r6, +r7]
+
+#381				NOT	{LNXT:159|-1|-1}
+(*) BOOL
+005BA682  2800     		cmp r0, #0
+005BA684  BF08 2001		eqmov r0, #1
+005BA688  BF18 2000		nemov r0, #0
+
+#382				JMPCN	$label28	{LNXT:159|159|160}
+(-) BOOL
+005BA68C  2800     		cmp r0, #0
+005BA68E  D002     		beq #4 ; 0x005BA696
+
+
+#383		
+#384				(* THEN *)
+#385		
+#386					(* RETURN *)
+#387					RET
+#388		
+(-) BOOL
+005BA692  F000 BE1F		b #3134 ; 0x005BB2D4
+
+
+#389		$label28:
+#390				(* END_IF *)
+#391		
+#392		
+#393				(* IF TCPClient.File = NULL *)
+#394				LD		TCPClient.File	{LNXT:160|-1|-1}
+(*) UNDEF
+005BA696  F8DF 7384		ldr r7, [pc, #+900] ; 0x134
+005BA69A  59F0     		ldr r0, [r6, +r7]
+
+#395				EQ		NULL	{LNXT:160|-1|-1}
+(*) UDINT
+005BA69C  2700     		mov r7, #0 ; 0
+005BA69E  42B8     		cmp r0, r7
+005BA6A0  BF18 2000		nemov r0, #0
+005BA6A4  BF08 2001		eqmov r0, #1
+
+#396				JMPCN	$label29	{LNXT:160|160|161}
+(-) BOOL
+005BA6A8  2800     		cmp r0, #0
+005BA6AA  D002     		beq #4 ; 0x005BA6B2
+
+
+#397		
+#398				(* THEN *)
+#399		
+#400					(* RETURN *)
+#401					RET
+#402		
+(-) BOOL
+005BA6AE  F000 BE11		b #3106 ; 0x005BB2D4
+
+
+#403		$label29:
+#404				(* END_IF *)
+#405		
+#406				(* ETPtr:=ADR('>'); *)
+#407				ADR		'>'	{LNXT:161|162|-1}
+(*) BOOL
+005BA6B2  F8DF 040C		ldr r0, [pc, #+1036] ; 0x5BA0B4
+
+#408				ST		ETPtr	{LNXT:161|162|-1}
+(*) DWORD
+005BA6B6  F8DF 732C		ldr r7, [pc, #+812] ; 0x104
+005BA6BA  51F0     		str r0, [r6, +r7]
+
+#409		
+#410				(* CaseBk:=CaseNr+1; *)
+#411				LD		CaseNr	{LNXT:162|163|-1}
+(*) UNDEF
+005BA6BC  F8DF 7320		ldr r7, [pc, #+800] ; 0x102
+005BA6C0  5DF0     		ldrb r0, [r6, +r7]
+
+#412				ADD		1	{LNXT:162|163|-1}
+(-) USINT
+005BA6C2  1C40     		add r0, r0, #1
+
+#413				ST		CaseBk	{LNXT:162|163|-1}
+(*) USINT
+005BA6C4  F8DF 7314		ldr r7, [pc, #+788] ; 0x101
+005BA6C8  55F0     		strb r0, [r6, +r7]
+
+#414		
+#415				(* CaseNr:=220; *)
+#416				MOVE		220,CaseNr	{LNXT:163|-1|-1}
+(*) USINT
+005BA6CA  20DC     		mov r0, #220 ; 220
+005BA6CC  F8DF 7310		ldr r7, [pc, #+784] ; 0x102
+005BA6D0  55F0     		strb r0, [r6, +r7]
+
+#417				JMP		$label10	{LNXT:1|-1|-1}
+(-) USINT
+005BA6D2  F000 BDFF		b #3070 ; 0x005BB2D4
+
+
+#418		
+#419		$label13:
+#420				(* Connected:=TRUE; *)
+#421				MOVE		TRUE,Connected	{LNXT:169|170|-1}
+(*) USINT
+005BA6D6  2001     		mov r0, #1 ; 1
+005BA6D8  F8DF 737C		ldr r7, [pc, #+892] ; 0x170
+005BA6DC  55F0     		strb r0, [r6, +r7]
+
+#422		
+#423				(* CaseNr:=50; *)
+#424				MOVE		50,CaseNr	{LNXT:170|-1|-1}
+(*) BOOL
+005BA6DE  2032     		mov r0, #50 ; 50
+005BA6E0  F8DF 72FC		ldr r7, [pc, #+764] ; 0x102
+005BA6E4  55F0     		strb r0, [r6, +r7]
+
+#425				JMP		$label10	{LNXT:169|-1|-1}
+(-) USINT
+005BA6E6  F000 BDF5		b #3050 ; 0x005BB2D4
+
+
+#426		
+#427		$label14:
+#428				(* QRPtr:=ADR('Status'); *)
+#429				ADR		'Status'	{LNXT:178|179|-1}
+(*) USINT
+005BA6EA  F8DF 03D8		ldr r0, [pc, #+984] ; 0x5BA0B8
+
+#430				ST		QRPtr	{LNXT:178|179|-1}
+(*) DWORD
+005BA6EE  F8DF 72FC		ldr r7, [pc, #+764] ; 0x10C
+005BA6F2  51F0     		str r0, [r6, +r7]
+
+#431		
+#432				(* ETPtr:=ADR('>'); *)
+#433				ADR		'>'	{LNXT:179|180|-1}
+(*) DWORD
+005BA6F4  F8DF 03C8		ldr r0, [pc, #+968] ; 0x5BA0B4
+
+#434				ST		ETPtr	{LNXT:179|180|-1}
+(*) DWORD
+005BA6F8  F8DF 72E8		ldr r7, [pc, #+744] ; 0x104
+005BA6FC  51F0     		str r0, [r6, +r7]
+
+#435		
+#436				(* CaseBk:=CaseNr+1; *)
+#437				LD		CaseNr	{LNXT:180|181|-1}
+(*) UNDEF
+005BA6FE  F8DF 72E0		ldr r7, [pc, #+736] ; 0x102
+005BA702  5DF0     		ldrb r0, [r6, +r7]
+
+#438				ADD		1	{LNXT:180|181|-1}
+(-) USINT
+005BA704  1C40     		add r0, r0, #1
+
+#439				ST		CaseBk	{LNXT:180|181|-1}
+(*) USINT
+005BA706  F8DF 72D4		ldr r7, [pc, #+724] ; 0x101
+005BA70A  55F0     		strb r0, [r6, +r7]
+
+#440		
+#441				(* CaseNr:=200; *)
+#442				MOVE		200,CaseNr	{LNXT:181|-1|-1}
+(*) USINT
+005BA70C  20C8     		mov r0, #200 ; 200
+005BA70E  F8DF 72D0		ldr r7, [pc, #+720] ; 0x102
+005BA712  55F0     		strb r0, [r6, +r7]
+
+#443				JMP		$label10	{LNXT:178|-1|-1}
+(-) USINT
+005BA714  F000 BDDE		b #3004 ; 0x005BB2D4
+
+
+#444		
+#445		$label15:
+#446		
+#447				(* IF ABf), ADR('RSSI value:'), FIND_GET_END), '%f', REAL_TYPE, ADR(RSSI))) *)
+#448				ADR		'RSSI value:'	{LNXT:194|-1|-1}
+(*) USINT
+005BA718  F8DF 03AC		ldr r0, [pc, #+940] ; 0x5BA0C0
+
+#449				ST		$$TMP4	{LNXT:194|-1|-1}
+(*) DWORD
+005BA71C  F8DF 7354		ldr r7, [pc, #+852] ; 0x190
+005BA720  51F0     		str r0, [r6, +r7]
+
+#450				ADR		RSSI	{LNXT:194|-1|-1}
+(*) DWORD
+005BA722  F8DF 7344		ldr r7, [pc, #+836] ; 0x178
+005BA726  19F0     		add r0, r6, r7
+
+#451				ST		$$TMP12	{LNXT:194|-1|-1}
+(*) DWORD
+005BA728  F8DF 7350		ldr r7, [pc, #+848] ; 0x198
+005BA72C  51F0     		str r0, [r6, +r7]
+
+#452				ADR		ABf	{LNXT:194|-1|-1}
+(-) DWORD
+005BA72E  4630     		mov r0, r6
+
+#453				SysStrFind		$$TMP4, FIND_GET_END	{LNXT:194|-1|-1}
+(-) DWORD
+005BA730  2204     		mov r2, #4 ; 4
+005BA732  F8DF 7340		ldr r7, [pc, #+832] ; 0x190
+005BA736  59F1     		ldr r1, [r6, +r7]
+005BA738  4600     		mov r0, r0
+005BA73A  F8DF 4360		ldr r4, [pc, #+864] ; 0x498A95
+005BA73E  F044 0401		orr r4, r4, #1
+005BA742  47A0     		blx r4
+
+#454				SysVarsscanf		'%f', REAL_TYPE, $$TMP12	{LNXT:194|-1|-1}
+(-) @USINT
+005BA744  F8DF 7334		ldr r7, [pc, #+820] ; 0x198
+005BA748  59F3     		ldr r3, [r6, +r7]
+005BA74A  222B     		mov r2, #43 ; 43
+005BA74C  F8DF 737C		ldr r7, [pc, #+892] ; 0x5BA0CC
+005BA750  4639     		mov r1, r7
+005BA752  4600     		mov r0, r0
+005BA754  F8DF 4338		ldr r4, [pc, #+824] ; 0x497D11
+005BA758  F044 0401		orr r4, r4, #1
+005BA75C  47A0     		blx r4
+
+#455				NOT	{LNXT:194|-1|-1}
+(*) BOOL
+005BA75E  2800     		cmp r0, #0
+005BA760  BF08 2001		eqmov r0, #1
+005BA764  BF18 2000		nemov r0, #0
+
+#456				JMPCN	$label30	{LNXT:194|194|195}
+(-) BOOL
+005BA768  2800     		cmp r0, #0
+005BA76A  D006     		beq #12 ; 0x005BA77A
+
+
+#457		
+#458				(* THEN *)
+#459		
+#460					(* ErrorNr:=22; *)
+#461					MOVE		22,ErrorNr	{LNXT:194|194|-1}
+(*) BOOL
+005BA76E  2016     		mov r0, #22 ; 22
+005BA770  F8DF 7274		ldr r7, [pc, #+628] ; 0x108
+005BA774  55F0     		strb r0, [r6, +r7]
+
+#462		
+#463					(* RETURN *)
+#464					RET
+#465		
+(-) USINT
+005BA776  F000 BDAD		b #2906 ; 0x005BB2D4
+
+
+#466		$label30:
+#467				(* END_IF *)
+#468		
+#469		
+#470				(* IF ABf), ADR('Button is:'), FIND_GET_END), '%s', STRING_TYPE, ADR(Button))) *)
+#471				ADR		'Button is:'	{LNXT:195|-1|-1}
+(*) USINT
+005BA77A  F8DF 0354		ldr r0, [pc, #+852] ; 0x5BA0D0
+
+#472				ST		$$TMP4	{LNXT:195|-1|-1}
+(*) DWORD
+005BA77E  F8DF 72F4		ldr r7, [pc, #+756] ; 0x190
+005BA782  51F0     		str r0, [r6, +r7]
+
+#473				ADR		Button	{LNXT:195|-1|-1}
+(*) DWORD
+005BA784  F8DF 72E4		ldr r7, [pc, #+740] ; 0x17C
+005BA788  19F0     		add r0, r6, r7
+
+#474				ST		$$TMP5	{LNXT:195|-1|-1}
+(*) DWORD
+005BA78A  F8DF 72EC		ldr r7, [pc, #+748] ; 0x194
+005BA78E  51F0     		str r0, [r6, +r7]
+
+#475				ADR		ABf	{LNXT:195|-1|-1}
+(-) DWORD
+005BA790  4630     		mov r0, r6
+
+#476				SysStrFind		$$TMP4, FIND_GET_END	{LNXT:195|-1|-1}
+(-) DWORD
+005BA792  2204     		mov r2, #4 ; 4
+005BA794  F8DF 72DC		ldr r7, [pc, #+732] ; 0x190
+005BA798  59F1     		ldr r1, [r6, +r7]
+005BA79A  4600     		mov r0, r0
+005BA79C  F8DF 42FC		ldr r4, [pc, #+764] ; 0x498A95
+005BA7A0  F044 0401		orr r4, r4, #1
+005BA7A4  47A0     		blx r4
+
+#477				SysVarsscanf		'%s', STRING_TYPE, $$TMP5	{LNXT:195|-1|-1}
+(-) @USINT
+005BA7A6  F8DF 72D0		ldr r7, [pc, #+720] ; 0x194
+005BA7AA  59F3     		ldr r3, [r6, +r7]
+005BA7AC  2232     		mov r2, #50 ; 50
+005BA7AE  F8DF 7324		ldr r7, [pc, #+804] ; 0x5BA0DC
+005BA7B2  4639     		mov r1, r7
+005BA7B4  4600     		mov r0, r0
+005BA7B6  F8DF 42D8		ldr r4, [pc, #+728] ; 0x497D11
+005BA7BA  F044 0401		orr r4, r4, #1
+005BA7BE  47A0     		blx r4
+
+#478				NOT	{LNXT:195|-1|-1}
+(*) BOOL
+005BA7C0  2800     		cmp r0, #0
+005BA7C2  BF08 2001		eqmov r0, #1
+005BA7C6  BF18 2000		nemov r0, #0
+
+#479				JMPCN	$label31	{LNXT:195|195|196}
+(-) BOOL
+005BA7CA  2800     		cmp r0, #0
+005BA7CC  D006     		beq #12 ; 0x005BA7DC
+
+
+#480		
+#481				(* THEN *)
+#482		
+#483					(* ErrorNr:=23; *)
+#484					MOVE		23,ErrorNr	{LNXT:195|195|-1}
+(*) BOOL
+005BA7D0  2017     		mov r0, #23 ; 23
+005BA7D2  F8DF 7214		ldr r7, [pc, #+532] ; 0x108
+005BA7D6  55F0     		strb r0, [r6, +r7]
+
+#485		
+#486					(* RETURN *)
+#487					RET
+#488		
+(-) USINT
+005BA7D8  F000 BD7C		b #2808 ; 0x005BB2D4
+
+
+#489		$label31:
+#490				(* END_IF *)
+#491		
+#492		
+#493				(* IF ABf), ADR('Sensor acquired:'), FIND_GET_END), '%d', USINT_TYPE, ADR(ScanfData))) *)
+#494				ADR		'Sensor acquired:'	{LNXT:196|-1|-1}
+(*) USINT
+005BA7DC  F8DF 02F8		ldr r0, [pc, #+760] ; 0x5BA0E0
+
+#495				ST		$$TMP4	{LNXT:196|-1|-1}
+(*) DWORD
+005BA7E0  F8DF 7290		ldr r7, [pc, #+656] ; 0x190
+005BA7E4  51F0     		str r0, [r6, +r7]
+
+#496				ADR		ScanfData	{LNXT:196|-1|-1}
+(*) DWORD
+005BA7E6  F8DF 7248		ldr r7, [pc, #+584] ; 0x14C
+005BA7EA  19F0     		add r0, r6, r7
+
+#497				ST		$$TMP20	{LNXT:196|-1|-1}
+(*) DWORD
+005BA7EC  F8DF 7290		ldr r7, [pc, #+656] ; 0x19C
+005BA7F0  51F0     		str r0, [r6, +r7]
+
+#498				ADR		ABf	{LNXT:196|-1|-1}
+(-) DWORD
+005BA7F2  4630     		mov r0, r6
+
+#499				SysStrFind		$$TMP4, FIND_GET_END	{LNXT:196|-1|-1}
+(-) DWORD
+005BA7F4  2204     		mov r2, #4 ; 4
+005BA7F6  F8DF 727C		ldr r7, [pc, #+636] ; 0x190
+005BA7FA  59F1     		ldr r1, [r6, +r7]
+005BA7FC  4600     		mov r0, r0
+005BA7FE  F8DF 429C		ldr r4, [pc, #+668] ; 0x498A95
+005BA802  F044 0401		orr r4, r4, #1
+005BA806  47A0     		blx r4
+
+#500				SysVarsscanf		'%d', USINT_TYPE, $$TMP20	{LNXT:196|-1|-1}
+(-) @USINT
+005BA808  F8DF 7274		ldr r7, [pc, #+628] ; 0x19C
+005BA80C  59F3     		ldr r3, [r6, +r7]
+005BA80E  2216     		mov r2, #22 ; 22
+005BA810  F8DF 72C8		ldr r7, [pc, #+712] ; 0x5BA0F4
+005BA814  4639     		mov r1, r7
+005BA816  4600     		mov r0, r0
+005BA818  F8DF 4274		ldr r4, [pc, #+628] ; 0x497D11
+005BA81C  F044 0401		orr r4, r4, #1
+005BA820  47A0     		blx r4
+
+#501				NOT	{LNXT:196|-1|-1}
+(*) BOOL
+005BA822  2800     		cmp r0, #0
+005BA824  BF08 2001		eqmov r0, #1
+005BA828  BF18 2000		nemov r0, #0
+
+#502				JMPCN	$label32	{LNXT:196|196|200}
+(-) BOOL
+005BA82C  2800     		cmp r0, #0
+005BA82E  D006     		beq #12 ; 0x005BA83E
+
+
+#503		
+#504				(* THEN *)
+#505		
+#506					(* ErrorNr:=24; *)
+#507					MOVE		24,ErrorNr	{LNXT:196|196|-1}
+(*) BOOL
+005BA832  2018     		mov r0, #24 ; 24
+005BA834  F8DF 71B0		ldr r7, [pc, #+432] ; 0x108
+005BA838  55F0     		strb r0, [r6, +r7]
+
+#508		
+#509					(* RETURN *)
+#510					RET
+#511		
+(-) USINT
+005BA83A  F000 BD4B		b #2710 ; 0x005BB2D4
+
+
+#512		$label32:
+#513				(* END_IF *)
+#514		
+#515		
+#516				(* IF ScanfData <> 0 *)
+#517				LD		ScanfData	{LNXT:200|-1|-1}
+(*) UNDEF
+005BA83E  F8DF 71F0		ldr r7, [pc, #+496] ; 0x14C
+005BA842  5DF0     		ldrb r0, [r6, +r7]
+
+#518				NE		0	{LNXT:200|-1|-1}
+(*) BYTE
+005BA844  2800     		cmp r0, #0
+005BA846  BF08 2000		eqmov r0, #0
+005BA84A  BF18 2001		nemov r0, #1
+
+#519				JMPCN	$label33	{LNXT:200|200|201}
+(-) BOOL
+005BA84E  2800     		cmp r0, #0
+005BA850  D009     		beq #18 ; 0x005BA866
+
+
+#520		
+#521				(* THEN *)
+#522		
+#523					(* CaseNr:=CaseNr+1; *)
+#524					LD		CaseNr	{LNXT:200|200|-1}
+(*) UNDEF
+005BA854  F8DF 7188		ldr r7, [pc, #+392] ; 0x102
+005BA858  5DF0     		ldrb r0, [r6, +r7]
+
+#525					ADD		1	{LNXT:200|200|-1}
+(-) USINT
+005BA85A  1C40     		add r0, r0, #1
+
+#526					ST		CaseNr	{LNXT:200|200|-1}
+(*) USINT
+005BA85C  F8DF 7180		ldr r7, [pc, #+384] ; 0x102
+005BA860  55F0     		strb r0, [r6, +r7]
+
+#527		
+#528					(* RETURN *)
+#529					RET
+#530		
+(-) USINT
+005BA862  F000 BD37		b #2670 ; 0x005BB2D4
+
+
+#531		$label33:
+#532				(* END_IF *)
+#533		
+#534				(* CaseNr:=0; *)
+#535				MOVE		0,CaseNr	{LNXT:201|-1|-1}
+(*) USINT
+005BA866  2000     		mov r0, #0 ; 0
+005BA868  F8DF 7174		ldr r7, [pc, #+372] ; 0x102
+005BA86C  55F0     		strb r0, [r6, +r7]
+
+#536				JMP		$label10	{LNXT:1|-1|-1}
+(-) USINT
+005BA86E  F000 BD31		b #2658 ; 0x005BB2D4
+
+
+#537		
+#538		$label16:
+#539				(* QRPtr:=ADR('Sensor'); *)
+#540				ADR		'Sensor'	{LNXT:207|208|-1}
+(*) USINT
+005BA872  F8DF 026C		ldr r0, [pc, #+620] ; 0x5BA0F8
+
+#541				ST		QRPtr	{LNXT:207|208|-1}
+(*) DWORD
+005BA876  F8DF 7174		ldr r7, [pc, #+372] ; 0x10C
+005BA87A  51F0     		str r0, [r6, +r7]
+
+#542		
+#543				(* ETPtr:=ADR('>'); *)
+#544				ADR		'>'	{LNXT:208|209|-1}
+(*) DWORD
+005BA87C  F8DF 0240		ldr r0, [pc, #+576] ; 0x5BA0B4
+
+#545				ST		ETPtr	{LNXT:208|209|-1}
+(*) DWORD
+005BA880  F8DF 7160		ldr r7, [pc, #+352] ; 0x104
+005BA884  51F0     		str r0, [r6, +r7]
+
+#546		
+#547				(* CaseBk:=CaseNr+1; *)
+#548				LD		CaseNr	{LNXT:209|210|-1}
+(*) UNDEF
+005BA886  F8DF 7158		ldr r7, [pc, #+344] ; 0x102
+005BA88A  5DF0     		ldrb r0, [r6, +r7]
+
+#549				ADD		1	{LNXT:209|210|-1}
+(-) USINT
+005BA88C  1C40     		add r0, r0, #1
+
+#550				ST		CaseBk	{LNXT:209|210|-1}
+(*) USINT
+005BA88E  F8DF 714C		ldr r7, [pc, #+332] ; 0x101
+005BA892  55F0     		strb r0, [r6, +r7]
+
+#551		
+#552				(* CaseNr:=200; *)
+#553				MOVE		200,CaseNr	{LNXT:210|-1|-1}
+(*) USINT
+005BA894  20C8     		mov r0, #200 ; 200
+005BA896  F8DF 7148		ldr r7, [pc, #+328] ; 0x102
+005BA89A  55F0     		strb r0, [r6, +r7]
+
+#554				JMP		$label10	{LNXT:207|-1|-1}
+(-) USINT
+005BA89C  F000 BD1A		b #2612 ; 0x005BB2D4
+
+
+#555		
+#556		$label17:
+#557				(* ScanfAdd:=SysStrFind(ADR(ABf), ADR('Sensor:'), FIND_GET_END); *)
+#558				ADR		'Sensor:'	{LNXT:226|227|-1}
+(*) USINT
+005BA8A0  F8DF 0240		ldr r0, [pc, #+576] ; 0x5BA100
+
+#559				ST		$$TMP4	{LNXT:226|227|-1}
+(*) DWORD
+005BA8A4  F8DF 71CC		ldr r7, [pc, #+460] ; 0x190
+005BA8A8  51F0     		str r0, [r6, +r7]
+
+#560				ADR		ABf	{LNXT:226|227|-1}
+(-) DWORD
+005BA8AA  4630     		mov r0, r6
+
+#561				SysStrFind		$$TMP4, FIND_GET_END	{LNXT:226|227|-1}
+(-) DWORD
+005BA8AC  2204     		mov r2, #4 ; 4
+005BA8AE  F8DF 71C4		ldr r7, [pc, #+452] ; 0x190
+005BA8B2  59F1     		ldr r1, [r6, +r7]
+005BA8B4  4600     		mov r0, r0
+005BA8B6  F8DF 41E4		ldr r4, [pc, #+484] ; 0x498A95
+005BA8BA  F044 0401		orr r4, r4, #1
+005BA8BE  47A0     		blx r4
+
+#562				ST		ScanfAdd	{LNXT:226|227|-1}
+(*) @USINT
+005BA8C0  F8DF 7168		ldr r7, [pc, #+360] ; 0x148
+005BA8C4  51F0     		str r0, [r6, +r7]
+
+#563		
+#564		
+#565				(* IF ScanfAdd = NULL *)
+#566				LD		ScanfAdd	{LNXT:227|-1|-1}
+(*) UNDEF
+005BA8C6  F8DF 7164		ldr r7, [pc, #+356] ; 0x148
+005BA8CA  59F0     		ldr r0, [r6, +r7]
+
+#567				EQ		NULL	{LNXT:227|-1|-1}
+(*) UDINT
+005BA8CC  2700     		mov r7, #0 ; 0
+005BA8CE  42B8     		cmp r0, r7
+005BA8D0  BF18 2000		nemov r0, #0
+005BA8D4  BF08 2001		eqmov r0, #1
+
+#568				JMPCN	$label34	{LNXT:227|227|233}
+(-) BOOL
+005BA8D8  2800     		cmp r0, #0
+005BA8DA  D006     		beq #12 ; 0x005BA8EA
+
+
+#569		
+#570				(* THEN *)
+#571		
+#572					(* ErrorNr:=100; *)
+#573					MOVE		100,ErrorNr	{LNXT:227|227|-1}
+(*) BOOL
+005BA8DE  2064     		mov r0, #100 ; 100
+005BA8E0  F8DF 7104		ldr r7, [pc, #+260] ; 0x108
+005BA8E4  55F0     		strb r0, [r6, +r7]
+
+#574		
+#575					(* RETURN *)
+#576					RET
+#577		
+(-) USINT
+005BA8E6  F000 BCF5		b #2538 ; 0x005BB2D4
+
+
+#578		$label34:
+#579				(* END_IF *)
+#580		
+#581				(* RxDLength:=SysStrFind(ADR(ABf), ADR('$r$l'), FIND_DEFAULT)-ScanfAdd; *)
+#582				ADR		'$r$l'	{LNXT:233|235|-1}
+(*) USINT
+005BA8EA  F8DF 01FC		ldr r0, [pc, #+508] ; 0x5BA108
+
+#583				ST		$$TMP4	{LNXT:233|235|-1}
+(*) DWORD
+005BA8EE  F8DF 7184		ldr r7, [pc, #+388] ; 0x190
+005BA8F2  51F0     		str r0, [r6, +r7]
+
+#584				ADR		ABf	{LNXT:233|235|-1}
+(-) DWORD
+005BA8F4  4630     		mov r0, r6
+
+#585				SysStrFind		$$TMP4, FIND_DEFAULT	{LNXT:233|235|-1}
+(-) DWORD
+005BA8F6  2200     		mov r2, #0 ; 0
+005BA8F8  F8DF 7178		ldr r7, [pc, #+376] ; 0x190
+005BA8FC  59F1     		ldr r1, [r6, +r7]
+005BA8FE  4600     		mov r0, r0
+005BA900  F8DF 4198		ldr r4, [pc, #+408] ; 0x498A95
+005BA904  F044 0401		orr r4, r4, #1
+005BA908  47A0     		blx r4
+
+#586				SUB		ScanfAdd	{LNXT:233|235|-1}
+(*) @USINT
+005BA90A  F8DF 7120		ldr r7, [pc, #+288] ; 0x148
+005BA90E  59F7     		ldr r7, [r6, +r7]
+005BA910  1BC0     		sub r0, r0, r7
+
+#587				ST		RxDLength	{LNXT:233|235|-1}
+(*) @USINT
+005BA912  F8DF 7128		ldr r7, [pc, #+296] ; 0x150
+005BA916  51F0     		str r0, [r6, +r7]
+
+#588		
+#589		
+#590				(* CASE RxDLength OF *)
+#591		
+#592				(* 6: *)
+#593				LD		RxDLength	{LNXT:239|-1|-1}
+(*) UNDEF
+005BA918  F8DF 7120		ldr r7, [pc, #+288] ; 0x150
+005BA91C  59F0     		ldr r0, [r6, +r7]
+
+#594				EQ		6	{LNXT:239|-1|-1}
+(*) UDINT
+005BA91E  2806     		cmp r0, #6
+005BA920  BF18 2000		nemov r0, #0
+005BA924  BF08 2001		eqmov r0, #1
+
+#595				JMPC		$label36	{LNXT:239|240|253}
+(-) BOOL
+005BA928  2800     		cmp r0, #0
+005BA92A  D10D     		bne #26 ; 0x005BA948
+
+
+#596		
+#597				(* 24: *)
+#598				LD		RxDLength	{LNXT:253|-1|-1}
+(*) UNDEF
+005BA92E  F8DF 710C		ldr r7, [pc, #+268] ; 0x150
+005BA932  59F0     		ldr r0, [r6, +r7]
+
+#599				EQ		24	{LNXT:253|-1|-1}
+(*) UDINT
+005BA934  2818     		cmp r0, #24
+005BA936  BF18 2000		nemov r0, #0
+005BA93A  BF08 2001		eqmov r0, #1
+
+#600				JMPC		$label37	{LNXT:253|264|259}
+(-) BOOL
+005BA93E  2800     		cmp r0, #0
+005BA940  D12D     		bne #90 ; 0x005BA99E
+
+
+#601		
+#602				(* ELSE *)
+#603				JMP		$label38	{LNXT:253|264|259}
+(-) BOOL
+005BA944  E02D     		b #90 ; 0x005BA9A2
+
+
+#604		
+#605				(* Istruzioni di ciascun CASE: *)
+#606		
+#607		$label36:
+#608		
+#609					(* IF ScanfAdd, ADR('AAA055'), FIND_DEFAULT)) <> ScanfAdd *)
+#610					ADR		'AAA055'	{LNXT:240|-1|-1}
+(*) BOOL
+005BA948  F8DF 01A0		ldr r0, [pc, #+416] ; 0x5BA110
+
+#611					ST		$$TMP4	{LNXT:240|-1|-1}
+(*) DWORD
+005BA94C  F8DF 7124		ldr r7, [pc, #+292] ; 0x190
+005BA950  51F0     		str r0, [r6, +r7]
+
+#612					LD		ScanfAdd	{LNXT:240|-1|-1}
+(*) UNDEF
+005BA952  F8DF 70D8		ldr r7, [pc, #+216] ; 0x148
+005BA956  59F0     		ldr r0, [r6, +r7]
+
+#613					SysStrFind		$$TMP4, FIND_DEFAULT	{LNXT:240|-1|-1}
+(-) UDINT
+005BA958  2200     		mov r2, #0 ; 0
+005BA95A  F8DF 7118		ldr r7, [pc, #+280] ; 0x190
+005BA95E  59F1     		ldr r1, [r6, +r7]
+005BA960  4600     		mov r0, r0
+005BA962  F8DF 4138		ldr r4, [pc, #+312] ; 0x498A95
+005BA966  F044 0401		orr r4, r4, #1
+005BA96A  47A0     		blx r4
+
+#614					TO_UDINT	{LNXT:240|-1|-1}
+(-) @USINT
+#615					NE		ScanfAdd	{LNXT:240|-1|-1}
+(*) UDINT
+005BA96C  F8DF 70BC		ldr r7, [pc, #+188] ; 0x148
+005BA970  59F7     		ldr r7, [r6, +r7]
+005BA972  42B8     		cmp r0, r7
+005BA974  BF08 2000		eqmov r0, #0
+005BA978  BF18 2001		nemov r0, #1
+
+#616					JMPCN	$label39	{LNXT:240|241|247}
+(-) BOOL
+005BA97C  2800     		cmp r0, #0
+005BA97E  D006     		beq #12 ; 0x005BA98E
+
+
+#617		
+#618					(* THEN *)
+#619		
+#620						(* ErrorNr:=101; *)
+#621						MOVE		101,ErrorNr	{LNXT:241|242|-1}
+(*) BOOL
+005BA982  2065     		mov r0, #101 ; 101
+005BA984  F8DF 7060		ldr r7, [pc, #+96] ; 0x108
+005BA988  55F0     		strb r0, [r6, +r7]
+
+#622		
+#623						(* RETURN *)
+#624						RET
+#625		
+(-) USINT
+005BA98A  F000 BCA3		b #2374 ; 0x005BB2D4
+
+
+#626		$label39:
+#627					(* END_IF *)
+#628		
+#629					(* CaseNr:=0; *)
+#630					MOVE		0,CaseNr	{LNXT:247|248|-1}
+(*) USINT
+005BA98E  2000     		mov r0, #0 ; 0
+005BA990  F8DF 704C		ldr r7, [pc, #+76] ; 0x102
+005BA994  55F0     		strb r0, [r6, +r7]
+
+#631		
+#632					(* RETURN *)
+#633					RET
+#634					JMP		$label35	{LNXT:1|-1|-1}
+(-) USINT
+005BA996  F000 BC9D		b #2362 ; 0x005BB2D4
+
+
+(-) USINT
+005BA99A  E008     		b #16 ; 0x005BA9AE
+
+
+#635		
+#636		$label37:
+#637					JMP		$label35	{LNXT:254|264|-1}
+(-) USINT
+005BA99E  E006     		b #12 ; 0x005BA9AE
+
+
+#638		
+#639		$label38:
+#640					(* ErrorNr:=101; *)
+#641					MOVE		101,ErrorNr	{LNXT:259|259|-1}
+(*) USINT
+005BA9A2  2065     		mov r0, #101 ; 101
+005BA9A4  F8DF 7040		ldr r7, [pc, #+64] ; 0x108
+005BA9A8  55F0     		strb r0, [r6, +r7]
+
+#642		
+#643					(* RETURN *)
+#644					RET
+#645		
+(-) USINT
+005BA9AA  F000 BC93		b #2342 ; 0x005BB2D4
+
+
+#646		$label35:
+#647		
+#648				(* END_CASE *)
+#649		
+#650		
+#651				(* IF ScanfAdd, '%02X', BYTE_TYPE, ADR(ScanfData))) *)
+#652				ADR		ScanfData	{LNXT:264|-1|-1}
+(*) USINT
+005BA9AE  F8DF 7080		ldr r7, [pc, #+128] ; 0x14C
+005BA9B2  19F0     		add r0, r6, r7
+
+#653				ST		$$TMP20	{LNXT:264|-1|-1}
+(*) DWORD
+005BA9B4  F8DF 70C8		ldr r7, [pc, #+200] ; 0x19C
+005BA9B8  51F0     		str r0, [r6, +r7]
+
+#654				LD		ScanfAdd	{LNXT:264|-1|-1}
+(*) UNDEF
+005BA9BA  F8DF 7070		ldr r7, [pc, #+112] ; 0x148
+005BA9BE  59F0     		ldr r0, [r6, +r7]
+
+#655				SysVarsscanf		'%02X', BYTE_TYPE, $$TMP20	{LNXT:264|-1|-1}
+(-) UDINT
+005BA9C0  F8DF 70BC		ldr r7, [pc, #+188] ; 0x19C
+005BA9C4  59F3     		ldr r3, [r6, +r7]
+005BA9C6  2214     		mov r2, #20 ; 20
+005BA9C8  F8DF 7124		ldr r7, [pc, #+292] ; 0x5BA118
+005BA9CC  4639     		mov r1, r7
+005BA9CE  4600     		mov r0, r0
+005BA9D0  F8DF 40BC		ldr r4, [pc, #+188] ; 0x497D11
+005BA9D4  F044 0401		orr r4, r4, #1
+005BA9D8  47A0     		blx r4
+
+005BA9DA  E091     		b #290
+
+005BA9DC  00000101		; 0x00000101
+005BA9E0  00000102		; 0x00000102
+005BA9E4  00000104		; 0x00000104
+005BA9E8  00000108		; 0x00000108
+005BA9EC  0000010C		; 0x0000010C
+005BA9F0  00000110		; 0x00000110
+005BA9F4  00000118		; 0x00000118
+005BA9F8  0000011C		; 0x0000011C
+005BA9FC  00000120		; 0x00000120
+005BAA00  00000124		; 0x00000124
+005BAA04  00000128		; 0x00000128
+005BAA08  0000012A		; 0x0000012A
+005BAA0C  0000012C		; 0x0000012C
+005BAA10  0000012E		; 0x0000012E
+005BAA14  00000130		; 0x00000130
+005BAA18  00000132		; 0x00000132
+005BAA1C  00000134		; 0x00000134
+005BAA20  00000138		; 0x00000138
+005BAA24  0000013C		; 0x0000013C
+005BAA28  00000144		; 0x00000144
+005BAA2C  00000148		; 0x00000148
+005BAA30  0000014C		; 0x0000014C
+005BAA34  0000014D		; 0x0000014D
+005BAA38  0000014E		; 0x0000014E
+005BAA3C  00000150		; 0x00000150
+005BAA40  00000154		; 0x00000154
+005BAA44  00000155		; 0x00000155
+005BAA48  00000156		; 0x00000156
+005BAA4C  00000158		; 0x00000158
+005BAA50  0000015C		; 0x0000015C
+005BAA54  00000160		; 0x00000160
+005BAA58  00000170		; 0x00000170
+005BAA5C  00000171		; 0x00000171
+005BAA60  00000172		; 0x00000172
+005BAA64  00000174		; 0x00000174
+005BAA68  00000178		; 0x00000178
+005BAA6C  0000017C		; 0x0000017C
+005BAA70  0000018C		; 0x0000018C
+005BAA74  00000190		; 0x00000190
+005BAA78  00000194		; 0x00000194
+005BAA7C  00000198		; 0x00000198
+005BAA80  0000019C		; 0x0000019C
+005BAA84  00496CD5		; 0x00496CD5
+005BAA88  00497AD9		; 0x00497AD9
+005BAA8C  00497C85		; 0x00497C85
+005BAA90  00497D11		; 0x00497D11
+005BAA94  00497F99		; 0x00497F99
+005BAA98  004986AD		; 0x004986AD
+005BAA9C  00498A95		; 0x00498A95
+005BAAA0  004AE4A9		; 0x004AE4A9
+005BAAA4  004AE4E9		; 0x004AE4E9
+005BAAA8  005BA084		; 0x005BA084
+005BAAAC  005BA090		; 0x005BA090
+005BAAB0  005BA0A0		; 0x005BA0A0
+005BAAB4  005BA0A4		; 0x005BA0A4
+005BAAB8  005BA0AC		; 0x005BA0AC
+005BAABC  005BA0B0		; 0x005BA0B0
+005BAAC0  005BA0B4		; 0x005BA0B4
+005BAAC4  005BA0B8		; 0x005BA0B8
+005BAAC8  005BA0C0		; 0x005BA0C0
+005BAACC  005BA0CC		; 0x005BA0CC
+005BAAD0  005BA0D0		; 0x005BA0D0
+005BAAD4  005BA0DC		; 0x005BA0DC
+005BAAD8  005BA0E0		; 0x005BA0E0
+005BAADC  005BA0F4		; 0x005BA0F4
+005BAAE0  005BA0F8		; 0x005BA0F8
+005BAAE4  005BA100		; 0x005BA100
+005BAAE8  005BA108		; 0x005BA108
+005BAAEC  005BA110		; 0x005BA110
+005BAAF0  005BA118		; 0x005BA118
+005BAAF4  005BA180		; 0x005BA180
+005BAAF8  005BA184		; 0x005BA184
+005BAAFC  20419D74		; 0x20419D74
+
+#656				NOT	{LNXT:264|-1|-1}
+(*) BOOL
+005BAB00  2800     		cmp r0, #0
+005BAB02  BF08 2001		eqmov r0, #1
+005BAB06  BF18 2000		nemov r0, #0
+
+#657				JMPCN	$label40	{LNXT:264|264|265}
+(-) BOOL
+005BAB0A  2800     		cmp r0, #0
+005BAB0C  D006     		beq #12 ; 0x005BAB1C
+
+
+#658		
+#659				(* THEN *)
+#660		
+#661					(* ErrorNr:=102; *)
+#662					MOVE		102,ErrorNr	{LNXT:264|264|-1}
+(*) BOOL
+005BAB10  2066     		mov r0, #102 ; 102
+005BAB12  F85F 712C		ldr r7, [pc, #-300] ; 0x108
+005BAB16  55F0     		strb r0, [r6, +r7]
+
+#663		
+#664					(* RETURN *)
+#665					RET
+#666		
+(-) USINT
+005BAB18  E3DC     		b #1976 ; 0x005BB2D4
+
+
+#667		$label40:
+#668				(* END_IF *)
+#669		
+#670		
+#671				(* IF ScanfData <> 16#AA *)
+#672				LD		ScanfData	{LNXT:265|-1|-1}
+(*) UNDEF
+005BAB1C  F85F 70F0		ldr r7, [pc, #-240] ; 0x14C
+005BAB20  5DF0     		ldrb r0, [r6, +r7]
+
+#673				NE		16#AA	{LNXT:265|-1|-1}
+(*) BYTE
+005BAB22  28AA     		cmp r0, #170
+005BAB24  BF08 2000		eqmov r0, #0
+005BAB28  BF18 2001		nemov r0, #1
+
+#674				JMPCN	$label41	{LNXT:265|265|266}
+(-) BOOL
+005BAB2C  2800     		cmp r0, #0
+005BAB2E  D006     		beq #12 ; 0x005BAB3E
+
+
+#675		
+#676				(* THEN *)
+#677		
+#678					(* ErrorNr:=102; *)
+#679					MOVE		102,ErrorNr	{LNXT:265|265|-1}
+(*) BOOL
+005BAB32  2066     		mov r0, #102 ; 102
+005BAB34  F85F 7150		ldr r7, [pc, #-336] ; 0x108
+005BAB38  55F0     		strb r0, [r6, +r7]
+
+#680		
+#681					(* RETURN *)
+#682					RET
+#683		
+(-) USINT
+005BAB3A  E3CB     		b #1942 ; 0x005BB2D4
+
+
+#684		$label41:
+#685				(* END_IF *)
+#686		
+#687				(* ScanfAdd:=ScanfAdd+2; *)
+#688				LD		ScanfAdd	{LNXT:266|270|-1}
+(*) UNDEF
+005BAB3E  F85F 7114		ldr r7, [pc, #-276] ; 0x148
+005BAB42  59F0     		ldr r0, [r6, +r7]
+
+#689				ADD		2	{LNXT:266|270|-1}
+(-) UDINT
+005BAB44  1C80     		add r0, r0, #2
+
+#690				ST		ScanfAdd	{LNXT:266|270|-1}
+(*) UDINT
+005BAB46  F85F 711C		ldr r7, [pc, #-284] ; 0x148
+005BAB4A  51F0     		str r0, [r6, +r7]
+
+#691		
+#692		
+#693				(* IF ScanfAdd, '%02X', BYTE_TYPE, ADR(OAction))) *)
+#694				ADR		OAction	{LNXT:270|-1|-1}
+(*) UDINT
+005BAB4C  F8DF 77A8		ldr r7, [pc, #+1960] ; 0x181
+005BAB50  19F0     		add r0, r6, r7
+
+#695				ST		$$TMP20	{LNXT:270|-1|-1}
+(*) DWORD
+005BAB52  F85F 70D4		ldr r7, [pc, #-212] ; 0x19C
+005BAB56  51F0     		str r0, [r6, +r7]
+
+#696				LD		ScanfAdd	{LNXT:270|-1|-1}
+(*) UNDEF
+005BAB58  F85F 7130		ldr r7, [pc, #-304] ; 0x148
+005BAB5C  59F0     		ldr r0, [r6, +r7]
+
+#697				SysVarsscanf		'%02X', BYTE_TYPE, $$TMP20	{LNXT:270|-1|-1}
+(-) UDINT
+005BAB5E  F85F 70E0		ldr r7, [pc, #-224] ; 0x19C
+005BAB62  59F3     		ldr r3, [r6, +r7]
+005BAB64  2214     		mov r2, #20 ; 20
+005BAB66  F85F 7078		ldr r7, [pc, #-120] ; 0x5BA118
+005BAB6A  4639     		mov r1, r7
+005BAB6C  4600     		mov r0, r0
+005BAB6E  F85F 40E0		ldr r4, [pc, #-224] ; 0x497D11
+005BAB72  F044 0401		orr r4, r4, #1
+005BAB76  47A0     		blx r4
+
+#698				NOT	{LNXT:270|-1|-1}
+(*) BOOL
+005BAB78  2800     		cmp r0, #0
+005BAB7A  BF08 2001		eqmov r0, #1
+005BAB7E  BF18 2000		nemov r0, #0
+
+#699				JMPCN	$label42	{LNXT:270|270|271}
+(-) BOOL
+005BAB82  2800     		cmp r0, #0
+005BAB84  D006     		beq #12 ; 0x005BAB94
+
+
+#700		
+#701				(* THEN *)
+#702		
+#703					(* ErrorNr:=103; *)
+#704					MOVE		103,ErrorNr	{LNXT:270|270|-1}
+(*) BOOL
+005BAB88  2067     		mov r0, #103 ; 103
+005BAB8A  F85F 71A4		ldr r7, [pc, #-420] ; 0x108
+005BAB8E  55F0     		strb r0, [r6, +r7]
+
+#705		
+#706					(* RETURN *)
+#707					RET
+#708		
+(-) USINT
+005BAB90  E3A0     		b #1856 ; 0x005BB2D4
+
+
+#709		$label42:
+#710				(* END_IF *)
+#711		
+#712				(* ScanfAdd:=ScanfAdd+2; *)
+#713				LD		ScanfAdd	{LNXT:271|275|-1}
+(*) UNDEF
+005BAB94  F85F 716C		ldr r7, [pc, #-364] ; 0x148
+005BAB98  59F0     		ldr r0, [r6, +r7]
+
+#714				ADD		2	{LNXT:271|275|-1}
+(-) UDINT
+005BAB9A  1C80     		add r0, r0, #2
+
+#715				ST		ScanfAdd	{LNXT:271|275|-1}
+(*) UDINT
+005BAB9C  F85F 7174		ldr r7, [pc, #-372] ; 0x148
+005BABA0  51F0     		str r0, [r6, +r7]
+
+#716		
+#717		
+#718				(* IF ScanfAdd, '%04X', UINT_TYPE, ADR(OTSyn))) *)
+#719				ADR		OTSyn	{LNXT:275|-1|-1}
+(*) UDINT
+005BABA2  F8DF 7758		ldr r7, [pc, #+1880] ; 0x182
+005BABA6  19F0     		add r0, r6, r7
+
+#720				ST		$$TMP29	{LNXT:275|-1|-1}
+(*) DWORD
+005BABA8  F8DF 7760		ldr r7, [pc, #+1888] ; 0x1A0
+005BABAC  51F0     		str r0, [r6, +r7]
+
+#721				LD		ScanfAdd	{LNXT:275|-1|-1}
+(*) UNDEF
+005BABAE  F85F 7184		ldr r7, [pc, #-388] ; 0x148
+005BABB2  59F0     		ldr r0, [r6, +r7]
+
+#722				SysVarsscanf		'%04X', UINT_TYPE, $$TMP29	{LNXT:275|-1|-1}
+(-) UDINT
+005BABB4  F8DF 7754		ldr r7, [pc, #+1876] ; 0x1A0
+005BABB8  59F3     		ldr r3, [r6, +r7]
+005BABBA  2220     		mov r2, #32 ; 32
+005BABBC  F8DF 7784		ldr r7, [pc, #+1924] ; 0x5BA120
+005BABC0  4639     		mov r1, r7
+005BABC2  4600     		mov r0, r0
+005BABC4  F85F 4138		ldr r4, [pc, #-312] ; 0x497D11
+005BABC8  F044 0401		orr r4, r4, #1
+005BABCC  47A0     		blx r4
+
+#723				NOT	{LNXT:275|-1|-1}
+(*) BOOL
+005BABCE  2800     		cmp r0, #0
+005BABD0  BF08 2001		eqmov r0, #1
+005BABD4  BF18 2000		nemov r0, #0
+
+#724				JMPCN	$label43	{LNXT:275|275|276}
+(-) BOOL
+005BABD8  2800     		cmp r0, #0
+005BABDA  D006     		beq #12 ; 0x005BABEA
+
+
+#725		
+#726				(* THEN *)
+#727		
+#728					(* ErrorNr:=104; *)
+#729					MOVE		104,ErrorNr	{LNXT:275|275|-1}
+(*) BOOL
+005BABDE  2068     		mov r0, #104 ; 104
+005BABE0  F85F 71FC		ldr r7, [pc, #-508] ; 0x108
+005BABE4  55F0     		strb r0, [r6, +r7]
+
+#730		
+#731					(* RETURN *)
+#732					RET
+#733		
+(-) USINT
+005BABE6  E375     		b #1770 ; 0x005BB2D4
+
+
+#734		$label43:
+#735				(* END_IF *)
+#736		
+#737				(* ScanfAdd:=ScanfAdd+4; *)
+#738				LD		ScanfAdd	{LNXT:276|280|-1}
+(*) UNDEF
+005BABEA  F85F 71C0		ldr r7, [pc, #-448] ; 0x148
+005BABEE  59F0     		ldr r0, [r6, +r7]
+
+#739				ADD		4	{LNXT:276|280|-1}
+(-) UDINT
+005BABF0  1D00     		add r0, r0, #4
+
+#740				ST		ScanfAdd	{LNXT:276|280|-1}
+(*) UDINT
+005BABF2  F85F 71C8		ldr r7, [pc, #-456] ; 0x148
+005BABF6  51F0     		str r0, [r6, +r7]
+
+#741		
+#742		
+#743				(* IF ScanfAdd, '%04X', UINT_TYPE, ADR(OTLow))) *)
+#744				ADR		OTLow	{LNXT:280|-1|-1}
+(*) UDINT
+005BABF8  F8DF 7704		ldr r7, [pc, #+1796] ; 0x184
+005BABFC  19F0     		add r0, r6, r7
+
+#745				ST		$$TMP29	{LNXT:280|-1|-1}
+(*) DWORD
+005BABFE  F8DF 770C		ldr r7, [pc, #+1804] ; 0x1A0
+005BAC02  51F0     		str r0, [r6, +r7]
+
+#746				LD		ScanfAdd	{LNXT:280|-1|-1}
+(*) UNDEF
+005BAC04  F85F 71DC		ldr r7, [pc, #-476] ; 0x148
+005BAC08  59F0     		ldr r0, [r6, +r7]
+
+#747				SysVarsscanf		'%04X', UINT_TYPE, $$TMP29	{LNXT:280|-1|-1}
+(-) UDINT
+005BAC0A  F8DF 7700		ldr r7, [pc, #+1792] ; 0x1A0
+005BAC0E  59F3     		ldr r3, [r6, +r7]
+005BAC10  2220     		mov r2, #32 ; 32
+005BAC12  F8DF 7730		ldr r7, [pc, #+1840] ; 0x5BA120
+005BAC16  4639     		mov r1, r7
+005BAC18  4600     		mov r0, r0
+005BAC1A  F85F 418C		ldr r4, [pc, #-396] ; 0x497D11
+005BAC1E  F044 0401		orr r4, r4, #1
+005BAC22  47A0     		blx r4
+
+#748				NOT	{LNXT:280|-1|-1}
+(*) BOOL
+005BAC24  2800     		cmp r0, #0
+005BAC26  BF08 2001		eqmov r0, #1
+005BAC2A  BF18 2000		nemov r0, #0
+
+#749				JMPCN	$label44	{LNXT:280|280|281}
+(-) BOOL
+005BAC2E  2800     		cmp r0, #0
+005BAC30  D006     		beq #12 ; 0x005BAC40
+
+
+#750		
+#751				(* THEN *)
+#752		
+#753					(* ErrorNr:=105; *)
+#754					MOVE		105,ErrorNr	{LNXT:280|280|-1}
+(*) BOOL
+005BAC34  2069     		mov r0, #105 ; 105
+005BAC36  F85F 7250		ldr r7, [pc, #-592] ; 0x108
+005BAC3A  55F0     		strb r0, [r6, +r7]
+
+#755		
+#756					(* RETURN *)
+#757					RET
+#758		
+(-) USINT
+005BAC3C  E34A     		b #1684 ; 0x005BB2D4
+
+
+#759		$label44:
+#760				(* END_IF *)
+#761		
+#762				(* ScanfAdd:=ScanfAdd+4; *)
+#763				LD		ScanfAdd	{LNXT:281|285|-1}
+(*) UNDEF
+005BAC40  F85F 7218		ldr r7, [pc, #-536] ; 0x148
+005BAC44  59F0     		ldr r0, [r6, +r7]
+
+#764				ADD		4	{LNXT:281|285|-1}
+(-) UDINT
+005BAC46  1D00     		add r0, r0, #4
+
+#765				ST		ScanfAdd	{LNXT:281|285|-1}
+(*) UDINT
+005BAC48  F85F 7220		ldr r7, [pc, #-544] ; 0x148
+005BAC4C  51F0     		str r0, [r6, +r7]
+
+#766		
+#767		
+#768				(* IF ScanfAdd, '%04X', UINT_TYPE, ADR(OTHigh))) *)
+#769				ADR		OTHigh	{LNXT:285|-1|-1}
+(*) UDINT
+005BAC4E  F8DF 76B4		ldr r7, [pc, #+1716] ; 0x186
+005BAC52  19F0     		add r0, r6, r7
+
+#770				ST		$$TMP29	{LNXT:285|-1|-1}
+(*) DWORD
+005BAC54  F8DF 76B4		ldr r7, [pc, #+1716] ; 0x1A0
+005BAC58  51F0     		str r0, [r6, +r7]
+
+#771				LD		ScanfAdd	{LNXT:285|-1|-1}
+(*) UNDEF
+005BAC5A  F85F 7230		ldr r7, [pc, #-560] ; 0x148
+005BAC5E  59F0     		ldr r0, [r6, +r7]
+
+#772				SysVarsscanf		'%04X', UINT_TYPE, $$TMP29	{LNXT:285|-1|-1}
+(-) UDINT
+005BAC60  F8DF 76A8		ldr r7, [pc, #+1704] ; 0x1A0
+005BAC64  59F3     		ldr r3, [r6, +r7]
+005BAC66  2220     		mov r2, #32 ; 32
+005BAC68  F8DF 76D8		ldr r7, [pc, #+1752] ; 0x5BA120
+005BAC6C  4639     		mov r1, r7
+005BAC6E  4600     		mov r0, r0
+005BAC70  F85F 41E4		ldr r4, [pc, #-484] ; 0x497D11
+005BAC74  F044 0401		orr r4, r4, #1
+005BAC78  47A0     		blx r4
+
+#773				NOT	{LNXT:285|-1|-1}
+(*) BOOL
+005BAC7A  2800     		cmp r0, #0
+005BAC7C  BF08 2001		eqmov r0, #1
+005BAC80  BF18 2000		nemov r0, #0
+
+#774				JMPCN	$label45	{LNXT:285|285|286}
+(-) BOOL
+005BAC84  2800     		cmp r0, #0
+005BAC86  D006     		beq #12 ; 0x005BAC96
+
+
+#775		
+#776				(* THEN *)
+#777		
+#778					(* ErrorNr:=106; *)
+#779					MOVE		106,ErrorNr	{LNXT:285|285|-1}
+(*) BOOL
+005BAC8A  206A     		mov r0, #106 ; 106
+005BAC8C  F85F 72A8		ldr r7, [pc, #-680] ; 0x108
+005BAC90  55F0     		strb r0, [r6, +r7]
+
+#780		
+#781					(* RETURN *)
+#782					RET
+#783		
+(-) USINT
+005BAC92  E31F     		b #1598 ; 0x005BB2D4
+
+
+#784		$label45:
+#785				(* END_IF *)
+#786		
+#787				(* ScanfAdd:=ScanfAdd+4; *)
+#788				LD		ScanfAdd	{LNXT:286|290|-1}
+(*) UNDEF
+005BAC96  F85F 726C		ldr r7, [pc, #-620] ; 0x148
+005BAC9A  59F0     		ldr r0, [r6, +r7]
+
+#789				ADD		4	{LNXT:286|290|-1}
+(-) UDINT
+005BAC9C  1D00     		add r0, r0, #4
+
+#790				ST		ScanfAdd	{LNXT:286|290|-1}
+(*) UDINT
+005BAC9E  F85F 7274		ldr r7, [pc, #-628] ; 0x148
+005BACA2  51F0     		str r0, [r6, +r7]
+
+#791		
+#792		
+#793				(* IF ScanfAdd, '%06X', UDINT_TYPE, ADR(OCode))) *)
+#794				ADR		OCode	{LNXT:290|-1|-1}
+(*) UDINT
+005BACA4  F8DF 7660		ldr r7, [pc, #+1632] ; 0x188
+005BACA8  19F0     		add r0, r6, r7
+
+#795				ST		$$TMP32	{LNXT:290|-1|-1}
+(*) DWORD
+005BACAA  F8DF 7664		ldr r7, [pc, #+1636] ; 0x1A4
+005BACAE  51F0     		str r0, [r6, +r7]
+
+#796				LD		ScanfAdd	{LNXT:290|-1|-1}
+(*) UNDEF
+005BACB0  F85F 7288		ldr r7, [pc, #-648] ; 0x148
+005BACB4  59F0     		ldr r0, [r6, +r7]
+
+#797				SysVarsscanf		'%06X', UDINT_TYPE, $$TMP32	{LNXT:290|-1|-1}
+(-) UDINT
+005BACB6  F8DF 7658		ldr r7, [pc, #+1624] ; 0x1A4
+005BACBA  59F3     		ldr r3, [r6, +r7]
+005BACBC  222A     		mov r2, #42 ; 42
+005BACBE  F8DF 7688		ldr r7, [pc, #+1672] ; 0x5BA128
+005BACC2  4639     		mov r1, r7
+005BACC4  4600     		mov r0, r0
+005BACC6  F85F 4238		ldr r4, [pc, #-568] ; 0x497D11
+005BACCA  F044 0401		orr r4, r4, #1
+005BACCE  47A0     		blx r4
+
+#798				NOT	{LNXT:290|-1|-1}
+(*) BOOL
+005BACD0  2800     		cmp r0, #0
+005BACD2  BF08 2001		eqmov r0, #1
+005BACD6  BF18 2000		nemov r0, #0
+
+#799				JMPCN	$label46	{LNXT:290|290|291}
+(-) BOOL
+005BACDA  2800     		cmp r0, #0
+005BACDC  D006     		beq #12 ; 0x005BACEC
+
+
+#800		
+#801				(* THEN *)
+#802		
+#803					(* ErrorNr:=107; *)
+#804					MOVE		107,ErrorNr	{LNXT:290|290|-1}
+(*) BOOL
+005BACE0  206B     		mov r0, #107 ; 107
+005BACE2  F85F 72FC		ldr r7, [pc, #-764] ; 0x108
+005BACE6  55F0     		strb r0, [r6, +r7]
+
+#805		
+#806					(* RETURN *)
+#807					RET
+#808		
+(-) USINT
+005BACE8  E2F4     		b #1512 ; 0x005BB2D4
+
+
+#809		$label46:
+#810				(* END_IF *)
+#811		
+#812				(* ScanfAdd:=ScanfAdd+6; *)
+#813				LD		ScanfAdd	{LNXT:291|295|-1}
+(*) UNDEF
+005BACEC  F85F 72C4		ldr r7, [pc, #-708] ; 0x148
+005BACF0  59F0     		ldr r0, [r6, +r7]
+
+#814				ADD		6	{LNXT:291|295|-1}
+(-) UDINT
+005BACF2  1D80     		add r0, r0, #6
+
+#815				ST		ScanfAdd	{LNXT:291|295|-1}
+(*) UDINT
+005BACF4  F85F 72CC		ldr r7, [pc, #-716] ; 0x148
+005BACF8  51F0     		str r0, [r6, +r7]
+
+#816		
+#817		
+#818				(* IF ScanfAdd, '%2X', BYTE_TYPE, ADR(ScanfData))) *)
+#819				ADR		ScanfData	{LNXT:295|-1|-1}
+(*) UDINT
+005BACFA  F85F 72CC		ldr r7, [pc, #-716] ; 0x14C
+005BACFE  19F0     		add r0, r6, r7
+
+#820				ST		$$TMP20	{LNXT:295|-1|-1}
+(*) DWORD
+005BAD00  F85F 7284		ldr r7, [pc, #-644] ; 0x19C
+005BAD04  51F0     		str r0, [r6, +r7]
+
+#821				LD		ScanfAdd	{LNXT:295|-1|-1}
+(*) UNDEF
+005BAD06  F85F 72DC		ldr r7, [pc, #-732] ; 0x148
+005BAD0A  59F0     		ldr r0, [r6, +r7]
+
+#822				SysVarsscanf		'%2X', BYTE_TYPE, $$TMP20	{LNXT:295|-1|-1}
+(-) UDINT
+005BAD0C  F85F 7290		ldr r7, [pc, #-656] ; 0x19C
+005BAD10  59F3     		ldr r3, [r6, +r7]
+005BAD12  2214     		mov r2, #20 ; 20
+005BAD14  F8DF 7634		ldr r7, [pc, #+1588] ; 0x5BA130
+005BAD18  4639     		mov r1, r7
+005BAD1A  4600     		mov r0, r0
+005BAD1C  F85F 4290		ldr r4, [pc, #-656] ; 0x497D11
+005BAD20  F044 0401		orr r4, r4, #1
+005BAD24  47A0     		blx r4
+
+#823				NOT	{LNXT:295|-1|-1}
+(*) BOOL
+005BAD26  2800     		cmp r0, #0
+005BAD28  BF08 2001		eqmov r0, #1
+005BAD2C  BF18 2000		nemov r0, #0
+
+#824				JMPCN	$label47	{LNXT:295|295|296}
+(-) BOOL
+005BAD30  2800     		cmp r0, #0
+005BAD32  D006     		beq #12 ; 0x005BAD42
+
+
+#825		
+#826				(* THEN *)
+#827		
+#828					(* ErrorNr:=108; *)
+#829					MOVE		108,ErrorNr	{LNXT:295|295|-1}
+(*) BOOL
+005BAD36  206C     		mov r0, #108 ; 108
+005BAD38  F85F 7354		ldr r7, [pc, #-852] ; 0x108
+005BAD3C  55F0     		strb r0, [r6, +r7]
+
+#830		
+#831					(* RETURN *)
+#832					RET
+#833		
+(-) USINT
+005BAD3E  E2C9     		b #1426 ; 0x005BB2D4
+
+
+#834		$label47:
+#835				(* END_IF *)
+#836		
+#837		
+#838				(* IF ScanfData <> 16#55 *)
+#839				LD		ScanfData	{LNXT:296|-1|-1}
+(*) UNDEF
+005BAD42  F85F 7314		ldr r7, [pc, #-788] ; 0x14C
+005BAD46  5DF0     		ldrb r0, [r6, +r7]
+
+#840				NE		16#55	{LNXT:296|-1|-1}
+(*) BYTE
+005BAD48  2855     		cmp r0, #85
+005BAD4A  BF08 2000		eqmov r0, #0
+005BAD4E  BF18 2001		nemov r0, #1
+
+#841				JMPCN	$label48	{LNXT:296|296|300}
+(-) BOOL
+005BAD52  2800     		cmp r0, #0
+005BAD54  D006     		beq #12 ; 0x005BAD64
+
+
+#842		
+#843				(* THEN *)
+#844		
+#845					(* ErrorNr:=114; *)
+#846					MOVE		114,ErrorNr	{LNXT:296|296|-1}
+(*) BOOL
+005BAD58  2072     		mov r0, #114 ; 114
+005BAD5A  F85F 7374		ldr r7, [pc, #-884] ; 0x108
+005BAD5E  55F0     		strb r0, [r6, +r7]
+
+#847		
+#848					(* RETURN *)
+#849					RET
+#850		
+(-) USINT
+005BAD60  E2B8     		b #1392 ; 0x005BB2D4
+
+
+#851		$label48:
+#852				(* END_IF *)
+#853		
+#854		
+#855				(* IF SpyOn *)
+#856				LD		SpyOn	{LNXT:300|-1|-1}
+(*) UNDEF
+005BAD64  F85F 7324		ldr r7, [pc, #-804] ; 0x155
+005BAD68  5DF0     		ldrb r0, [r6, +r7]
+
+#857				JMPCN	$label49	{LNXT:300|301|307}
+(-) BOOL
+005BAD6A  2800     		cmp r0, #0
+005BAD6C  D038     		beq #112 ; 0x005BADE0
+
+
+#858		
+#859				(* THEN *)
+#860		
+#861					(* i:=TO_UINT(SysVarsnprintf(ADR(ABf), SIZEOF(ABf), 'Sensor OCode:%d', UDINT_TYPE, ADR(OCode))); *)
+#862					ADR		OCode	{LNXT:301|302|-1}
+(*) BOOL
+005BAD70  F8DF 7594		ldr r7, [pc, #+1428] ; 0x188
+005BAD74  19F0     		add r0, r6, r7
+
+#863					ST		$$TMP32	{LNXT:301|302|-1}
+(*) DWORD
+005BAD76  F8DF 7598		ldr r7, [pc, #+1432] ; 0x1A4
+005BAD7A  51F0     		str r0, [r6, +r7]
+
+#864					ADR		ABf	{LNXT:301|302|-1}
+(-) DWORD
+005BAD7C  4630     		mov r0, r6
+
+#865					SysVarsnprintf		SIZE#ABf, 'Sensor OCode:%d', UDINT_TYPE, $$TMP32	{LNXT:301|302|-1}
+(-) DWORD
+005BAD7E  B082     		sub sp, sp, #8
+005BAD80  F8DF 758C		ldr r7, [pc, #+1420] ; 0x1A4
+005BAD84  59F7     		ldr r7, [r6, +r7]
+005BAD86  F8CD 7000		str r7, [sp]
+005BAD8A  232A     		mov r3, #42 ; 42
+005BAD8C  F8DF 75C0		ldr r7, [pc, #+1472] ; 0x5BA134
+005BAD90  463A     		mov r2, r7
+005BAD92  F8DF 75D4		ldr r7, [pc, #+1492] ; 0x5BA188
+005BAD96  6839     		ldr r1, [r7]
+005BAD98  4600     		mov r0, r0
+005BAD9A  F85F 4314		ldr r4, [pc, #-788] ; 0x497AD9
+005BAD9E  F044 0401		orr r4, r4, #1
+005BADA2  47A0     		blx r4
+005BADA4  B002     		add sp, sp, #8
+
+#866					TO_UINT	{LNXT:301|302|-1}
+(-) INT
+#867					ST		i	{LNXT:301|302|-1}
+(*) UINT
+005BADA6  F85F 7380		ldr r7, [pc, #-896] ; 0x144
+005BADAA  51F0     		str r0, [r6, +r7]
+
+#868		
+#869					(* i:=SysSpyData(SPY_ASCII, 16#00000004, ADR('Lg'), ADR(ABf)); *)
+#870					ADR		'Lg'	{LNXT:302|307|-1}
+(*) UINT
+005BADAC  F8DF 05A4		ldr r0, [pc, #+1444] ; 0x5BA144
+
+#871					ST		$$TMP4	{LNXT:302|307|-1}
+(*) DWORD
+005BADB0  F85F 7340		ldr r7, [pc, #-832] ; 0x190
+005BADB4  51F0     		str r0, [r6, +r7]
+
+#872					ADR		ABf	{LNXT:302|307|-1}
+(-) DWORD
+005BADB6  4630     		mov r0, r6
+
+#873					ST		$$TMP5	{LNXT:302|307|-1}
+(*) DWORD
+005BADB8  F85F 7344		ldr r7, [pc, #-836] ; 0x194
+005BADBC  51F0     		str r0, [r6, +r7]
+
+#874					LD		SPY_ASCII	{LNXT:302|307|-1}
+(-) UNDEF
+005BADBE  2001     		mov r0, #1 ; 1
+
+#875					SysSpyData		16#00000004, $$TMP4, $$TMP5	{LNXT:302|307|-1}
+(-) USINT
+005BADC0  F85F 734C		ldr r7, [pc, #-844] ; 0x194
+005BADC4  59F3     		ldr r3, [r6, +r7]
+005BADC6  F85F 7354		ldr r7, [pc, #-852] ; 0x190
+005BADCA  59F2     		ldr r2, [r6, +r7]
+005BADCC  2104     		mov r1, #4 ; 4
+005BADCE  4600     		mov r0, r0
+005BADD0  F85F 4340		ldr r4, [pc, #-832] ; 0x497F99
+005BADD4  F044 0401		orr r4, r4, #1
+005BADD8  47A0     		blx r4
+
+#876					ST		i	{LNXT:302|307|-1}
+(*) BOOL
+005BADDA  F85F 73B4		ldr r7, [pc, #-948] ; 0x144
+005BADDE  51F0     		str r0, [r6, +r7]
+
+#877		
+#878		$label49:
+#879				(* END_IF *)
+#880		
+#881				(* SensorOk:=TRUE; *)
+#882				MOVE		TRUE,SensorOk	{LNXT:307|308|-1}
+(*) UDINT
+005BADE0  2001     		mov r0, #1 ; 1
+005BADE2  F85F 7384		ldr r7, [pc, #-900] ; 0x172
+005BADE6  55F0     		strb r0, [r6, +r7]
+
+#883		
+#884				(* CaseNr:=0; *)
+#885				MOVE		0,CaseNr	{LNXT:308|-1|-1}
+(*) BOOL
+005BADE8  2000     		mov r0, #0 ; 0
+005BADEA  F85F 740C		ldr r7, [pc, #-1036] ; 0x102
+005BADEE  55F0     		strb r0, [r6, +r7]
+
+#886				JMP		$label10	{LNXT:226|-1|-1}
+(-) USINT
+005BADF0  E270     		b #1248 ; 0x005BB2D4
+
+
+#887		
+#888		$label18:
+#889				(* i:=Sysmemset(ADR(ABf), 0, SIZEOF(ABf)); *)
+#890				ADR		ABf	{LNXT:327|328|-1}
+(-) USINT
+005BADF4  4630     		mov r0, r6
+
+#891				Sysmemset		0, SIZE#ABf	{LNXT:327|328|-1}
+(-) DWORD
+005BADF6  F8DF 7574		ldr r7, [pc, #+1396] ; 0x5BA18C
+005BADFA  683A     		ldr r2, [r7]
+005BADFC  2100     		mov r1, #0 ; 0
+005BADFE  4600     		mov r0, r0
+005BAE00  F8DF 4514		ldr r4, [pc, #+1300] ; 0x49895D
+005BAE04  F044 0401		orr r4, r4, #1
+005BAE08  47A0     		blx r4
+
+#892				ST		i	{LNXT:327|328|-1}
+(*) @USINT
+005BAE0A  F85F 73E4		ldr r7, [pc, #-996] ; 0x144
+005BAE0E  51F0     		str r0, [r6, +r7]
+
+#893		
+#894				(* i:=TO_UINT(SysVarsnprintf(ADR(ABf), SIZEOF(ABf), 'RFOut AA%02X', BYTE_TYPE, ADR(IAction))); *)
+#895				ADR		IAction	{LNXT:328|329|-1}
+(*) UDINT
+005BAE10  F8DF 74D0		ldr r7, [pc, #+1232] ; 0x164
+005BAE14  19F0     		add r0, r6, r7
+
+#896				ST		$$TMP20	{LNXT:328|329|-1}
+(*) DWORD
+005BAE16  F85F 7398		ldr r7, [pc, #-920] ; 0x19C
+005BAE1A  51F0     		str r0, [r6, +r7]
+
+#897				ADR		ABf	{LNXT:328|329|-1}
+(-) DWORD
+005BAE1C  4630     		mov r0, r6
+
+#898				SysVarsnprintf		SIZE#ABf, 'RFOut AA%02X', BYTE_TYPE, $$TMP20	{LNXT:328|329|-1}
+(-) DWORD
+005BAE1E  B082     		sub sp, sp, #8
+005BAE20  F85F 73A4		ldr r7, [pc, #-932] ; 0x19C
+005BAE24  59F7     		ldr r7, [r6, +r7]
+005BAE26  F8CD 7000		str r7, [sp]
+005BAE2A  2314     		mov r3, #20 ; 20
+005BAE2C  F8DF 7528		ldr r7, [pc, #+1320] ; 0x5BA148
+005BAE30  463A     		mov r2, r7
+005BAE32  F8DF 753C		ldr r7, [pc, #+1340] ; 0x5BA190
+005BAE36  6839     		ldr r1, [r7]
+005BAE38  4600     		mov r0, r0
+005BAE3A  F85F 43B4		ldr r4, [pc, #-948] ; 0x497AD9
+005BAE3E  F044 0401		orr r4, r4, #1
+005BAE42  47A0     		blx r4
+005BAE44  B002     		add sp, sp, #8
+
+#899				TO_UINT	{LNXT:328|329|-1}
+(-) INT
+#900				ST		i	{LNXT:328|329|-1}
+(*) UINT
+005BAE46  F85F 7420		ldr r7, [pc, #-1056] ; 0x144
+005BAE4A  51F0     		str r0, [r6, +r7]
+
+#901		
+#902				(* i:=TO_UINT(SysLWVarsnprintf(ADR(ABf), SIZEOF(ABf), '%04X', UINT_TYPE, ADR(ITSyn))); *)
+#903				ADR		ITSyn	{LNXT:329|330|-1}
+(*) UINT
+005BAE4C  F8DF 7498		ldr r7, [pc, #+1176] ; 0x166
+005BAE50  19F0     		add r0, r6, r7
+
+#904				ST		$$TMP29	{LNXT:329|330|-1}
+(*) DWORD
+005BAE52  F8DF 74B8		ldr r7, [pc, #+1208] ; 0x1A0
+005BAE56  51F0     		str r0, [r6, +r7]
+
+#905				ADR		ABf	{LNXT:329|330|-1}
+(-) DWORD
+005BAE58  4630     		mov r0, r6
+
+#906				SysLWVarsnprintf		SIZE#ABf, '%04X', UINT_TYPE, $$TMP29	{LNXT:329|330|-1}
+(-) DWORD
+005BAE5A  B082     		sub sp, sp, #8
+005BAE5C  F8DF 74AC		ldr r7, [pc, #+1196] ; 0x1A0
+005BAE60  59F7     		ldr r7, [r6, +r7]
+005BAE62  F8CD 7000		str r7, [sp]
+005BAE66  2320     		mov r3, #32 ; 32
+005BAE68  F8DF 74D8		ldr r7, [pc, #+1240] ; 0x5BA120
+005BAE6C  463A     		mov r2, r7
+005BAE6E  F8DF 7504		ldr r7, [pc, #+1284] ; 0x5BA194
+005BAE72  6839     		ldr r1, [r7]
+005BAE74  4600     		mov r0, r0
+005BAE76  F85F 43EC		ldr r4, [pc, #-1004] ; 0x497C85
+005BAE7A  F044 0401		orr r4, r4, #1
+005BAE7E  47A0     		blx r4
+005BAE80  B002     		add sp, sp, #8
+
+#907				TO_UINT	{LNXT:329|330|-1}
+(-) INT
+#908				ST		i	{LNXT:329|330|-1}
+(*) UINT
+005BAE82  F85F 745C		ldr r7, [pc, #-1116] ; 0x144
+005BAE86  51F0     		str r0, [r6, +r7]
+
+#909		
+#910				(* i:=TO_UINT(SysLWVarsnprintf(ADR(ABf), SIZEOF(ABf), '%04X', UINT_TYPE, ADR(ITLow))); *)
+#911				ADR		ITLow	{LNXT:330|331|-1}
+(*) UINT
+005BAE88  F8DF 7460		ldr r7, [pc, #+1120] ; 0x168
+005BAE8C  19F0     		add r0, r6, r7
+
+#912				ST		$$TMP29	{LNXT:330|331|-1}
+(*) DWORD
+005BAE8E  F8DF 747C		ldr r7, [pc, #+1148] ; 0x1A0
+005BAE92  51F0     		str r0, [r6, +r7]
+
+#913				ADR		ABf	{LNXT:330|331|-1}
+(-) DWORD
+005BAE94  4630     		mov r0, r6
+
+#914				SysLWVarsnprintf		SIZE#ABf, '%04X', UINT_TYPE, $$TMP29	{LNXT:330|331|-1}
+(-) DWORD
+005BAE96  B082     		sub sp, sp, #8
+005BAE98  F8DF 7470		ldr r7, [pc, #+1136] ; 0x1A0
+005BAE9C  59F7     		ldr r7, [r6, +r7]
+005BAE9E  F8CD 7000		str r7, [sp]
+005BAEA2  2320     		mov r3, #32 ; 32
+005BAEA4  F8DF 749C		ldr r7, [pc, #+1180] ; 0x5BA120
+005BAEA8  463A     		mov r2, r7
+005BAEAA  F8DF 74CC		ldr r7, [pc, #+1228] ; 0x5BA198
+005BAEAE  6839     		ldr r1, [r7]
+005BAEB0  4600     		mov r0, r0
+005BAEB2  F85F 4428		ldr r4, [pc, #-1064] ; 0x497C85
+005BAEB6  F044 0401		orr r4, r4, #1
+005BAEBA  47A0     		blx r4
+005BAEBC  B002     		add sp, sp, #8
+
+#915				TO_UINT	{LNXT:330|331|-1}
+(-) INT
+#916				ST		i	{LNXT:330|331|-1}
+(*) UINT
+005BAEBE  F85F 7498		ldr r7, [pc, #-1176] ; 0x144
+005BAEC2  51F0     		str r0, [r6, +r7]
+
+#917		
+#918				(* i:=TO_UINT(SysLWVarsnprintf(ADR(ABf), SIZEOF(ABf), '%04X', UINT_TYPE, ADR(ITHigh))); *)
+#919				ADR		ITHigh	{LNXT:331|332|-1}
+(*) UINT
+005BAEC4  F8DF 7428		ldr r7, [pc, #+1064] ; 0x16A
+005BAEC8  19F0     		add r0, r6, r7
+
+#920				ST		$$TMP29	{LNXT:331|332|-1}
+(*) DWORD
+005BAECA  F8DF 7440		ldr r7, [pc, #+1088] ; 0x1A0
+005BAECE  51F0     		str r0, [r6, +r7]
+
+#921				ADR		ABf	{LNXT:331|332|-1}
+(-) DWORD
+005BAED0  4630     		mov r0, r6
+
+#922				SysLWVarsnprintf		SIZE#ABf, '%04X', UINT_TYPE, $$TMP29	{LNXT:331|332|-1}
+(-) DWORD
+005BAED2  B082     		sub sp, sp, #8
+005BAED4  F8DF 7434		ldr r7, [pc, #+1076] ; 0x1A0
+005BAED8  59F7     		ldr r7, [r6, +r7]
+005BAEDA  F8CD 7000		str r7, [sp]
+005BAEDE  2320     		mov r3, #32 ; 32
+005BAEE0  F8DF 7460		ldr r7, [pc, #+1120] ; 0x5BA120
+005BAEE4  463A     		mov r2, r7
+005BAEE6  F8DF 7494		ldr r7, [pc, #+1172] ; 0x5BA19C
+005BAEEA  6839     		ldr r1, [r7]
+005BAEEC  4600     		mov r0, r0
+005BAEEE  F85F 4464		ldr r4, [pc, #-1124] ; 0x497C85
+005BAEF2  F044 0401		orr r4, r4, #1
+005BAEF6  47A0     		blx r4
+005BAEF8  B002     		add sp, sp, #8
+
+#923				TO_UINT	{LNXT:331|332|-1}
+(-) INT
+#924				ST		i	{LNXT:331|332|-1}
+(*) UINT
+005BAEFA  F85F 74D4		ldr r7, [pc, #-1236] ; 0x144
+005BAEFE  51F0     		str r0, [r6, +r7]
+
+#925		
+#926				(* i:=TO_UINT(SysLWVarsnprintf(ADR(ABf), SIZEOF(ABf), '%06X55$r', UDINT_TYPE, ADR(ICode))); *)
+#927				ADR		ICode	{LNXT:332|333|-1}
+(*) UINT
+005BAF00  F8DF 73F0		ldr r7, [pc, #+1008] ; 0x16C
+005BAF04  19F0     		add r0, r6, r7
+
+#928				ST		$$TMP32	{LNXT:332|333|-1}
+(*) DWORD
+005BAF06  F8DF 7408		ldr r7, [pc, #+1032] ; 0x1A4
+005BAF0A  51F0     		str r0, [r6, +r7]
+
+#929				ADR		ABf	{LNXT:332|333|-1}
+(-) DWORD
+005BAF0C  4630     		mov r0, r6
+
+#930				SysLWVarsnprintf		SIZE#ABf, '%06X55$r', UDINT_TYPE, $$TMP32	{LNXT:332|333|-1}
+(-) DWORD
+005BAF0E  B082     		sub sp, sp, #8
+005BAF10  F8DF 73FC		ldr r7, [pc, #+1020] ; 0x1A4
+005BAF14  59F7     		ldr r7, [r6, +r7]
+005BAF16  F8CD 7000		str r7, [sp]
+005BAF1A  232A     		mov r3, #42 ; 42
+005BAF1C  F8DF 743C		ldr r7, [pc, #+1084] ; 0x5BA158
+005BAF20  463A     		mov r2, r7
+005BAF22  F8DF 745C		ldr r7, [pc, #+1116] ; 0x5BA1A0
+005BAF26  6839     		ldr r1, [r7]
+005BAF28  4600     		mov r0, r0
+005BAF2A  F85F 44A0		ldr r4, [pc, #-1184] ; 0x497C85
+005BAF2E  F044 0401		orr r4, r4, #1
+005BAF32  47A0     		blx r4
+005BAF34  B002     		add sp, sp, #8
+
+#931				TO_UINT	{LNXT:332|333|-1}
+(-) INT
+#932				ST		i	{LNXT:332|333|-1}
+(*) UINT
+005BAF36  F85F 7510		ldr r7, [pc, #-1296] ; 0x144
+005BAF3A  51F0     		str r0, [r6, +r7]
+
+#933		
+#934				(* QRPtr:=ADR(ABf); *)
+#935				ADR		ABf	{LNXT:333|334|-1}
+(-) UINT
+005BAF3C  4630     		mov r0, r6
+
+#936				ST		QRPtr	{LNXT:333|334|-1}
+(*) DWORD
+005BAF3E  F85F 7554		ldr r7, [pc, #-1364] ; 0x10C
+005BAF42  51F0     		str r0, [r6, +r7]
+
+#937		
+#938				(* ETPtr:=ADR('>'); *)
+#939				ADR		'>'	{LNXT:334|335|-1}
+(*) DWORD
+005BAF44  F85F 0488		ldr r0, [pc, #-1160] ; 0x5BA0B4
+
+#940				ST		ETPtr	{LNXT:334|335|-1}
+(*) DWORD
+005BAF48  F85F 7568		ldr r7, [pc, #-1384] ; 0x104
+005BAF4C  51F0     		str r0, [r6, +r7]
+
+#941		
+#942				(* CaseBk:=CaseNr+1; *)
+#943				LD		CaseNr	{LNXT:335|336|-1}
+(*) UNDEF
+005BAF4E  F85F 7570		ldr r7, [pc, #-1392] ; 0x102
+005BAF52  5DF0     		ldrb r0, [r6, +r7]
+
+#944				ADD		1	{LNXT:335|336|-1}
+(-) USINT
+005BAF54  1C40     		add r0, r0, #1
+
+#945				ST		CaseBk	{LNXT:335|336|-1}
+(*) USINT
+005BAF56  F85F 757C		ldr r7, [pc, #-1404] ; 0x101
+005BAF5A  55F0     		strb r0, [r6, +r7]
+
+#946		
+#947				(* CaseNr:=200; *)
+#948				MOVE		200,CaseNr	{LNXT:336|-1|-1}
+(*) USINT
+005BAF5C  20C8     		mov r0, #200 ; 200
+005BAF5E  F85F 7580		ldr r7, [pc, #-1408] ; 0x102
+005BAF62  55F0     		strb r0, [r6, +r7]
+
+#949				JMP		$label10	{LNXT:327|-1|-1}
+(-) USINT
+005BAF64  E1B6     		b #876 ; 0x005BB2D4
+
+
+#950		
+#951		$label19:
+#952				(* CSPulse[1]:=FALSE; *)
+#953				MOVE		FALSE,CSPulse[1]	{LNXT:342|343|-1}
+(*) USINT
+005BAF68  2000     		mov r0, #0 ; 0
+005BAF6A  F85F 7534		ldr r7, [pc, #-1332] ; 0x14E
+005BAF6E  55F0     		strb r0, [r6, +r7]
+
+#954		
+#955				(* CaseNr:=0; *)
+#956				MOVE		0,CaseNr	{LNXT:343|-1|-1}
+(*) BOOL
+005BAF70  2000     		mov r0, #0 ; 0
+005BAF72  F85F 7594		ldr r7, [pc, #-1428] ; 0x102
+005BAF76  55F0     		strb r0, [r6, +r7]
+
+#957				JMP		$label10	{LNXT:342|-1|-1}
+(-) USINT
+005BAF78  E1AC     		b #856 ; 0x005BB2D4
+
+
+#958		
+#959		$label20:
+#960				(* i:=SysFIBfClear(TCPClient.File); *)
+#961				LD		TCPClient.File	{LNXT:351|352|-1}
+(*) UNDEF
+005BAF7C  F85F 7564		ldr r7, [pc, #-1380] ; 0x134
+005BAF80  59F0     		ldr r0, [r6, +r7]
+
+#962				SysFIBfClear	{LNXT:351|352|-1}
+(-) UDINT
+005BAF82  4600     		mov r0, r0
+005BAF84  F8DF 43B0		ldr r4, [pc, #+944] ; 0x498F91
+005BAF88  F044 0401		orr r4, r4, #1
+005BAF8C  47A0     		blx r4
+
+#963				ST		i	{LNXT:351|352|-1}
+(*) BOOL
+005BAF8E  F85F 7568		ldr r7, [pc, #-1384] ; 0x144
+005BAF92  51F0     		str r0, [r6, +r7]
+
+#964		
+#965				(* i:=SysFOBfClear(TCPClient.File); *)
+#966				LD		TCPClient.File	{LNXT:352|353|-1}
+(*) UNDEF
+005BAF94  F85F 757C		ldr r7, [pc, #-1404] ; 0x134
+005BAF98  59F0     		ldr r0, [r6, +r7]
+
+#967				SysFOBfClear	{LNXT:352|353|-1}
+(-) UDINT
+005BAF9A  4600     		mov r0, r0
+005BAF9C  F8DF 439C		ldr r4, [pc, #+924] ; 0x498FED
+005BAFA0  F044 0401		orr r4, r4, #1
+005BAFA4  47A0     		blx r4
+
+#968				ST		i	{LNXT:352|353|-1}
+(*) BOOL
+005BAFA6  F85F 7580		ldr r7, [pc, #-1408] ; 0x144
+005BAFAA  51F0     		str r0, [r6, +r7]
+
+#969		
+#970				(* i:=Sysfwrite(QRPtr, TO_INT(Sysstrlen(QRPtr)), 1, TCPClient.File); *)
+#971				LD		QRPtr	{LNXT:353|354|-1}
+(*) UNDEF
+005BAFAC  F85F 75C4		ldr r7, [pc, #-1476] ; 0x10C
+005BAFB0  59F0     		ldr r0, [r6, +r7]
+
+#972				Sysstrlen	{LNXT:353|354|-1}
+(-) @BYTE
+005BAFB2  4600     		mov r0, r0
+005BAFB4  F8DF 4364		ldr r4, [pc, #+868] ; 0x498BB1
+005BAFB8  F044 0401		orr r4, r4, #1
+005BAFBC  47A0     		blx r4
+
+#973				TO_INT	{LNXT:353|354|-1}
+(-) UDINT
+005BAFBE  B200     		sxth r0, r0
+
+#974				ST		$$TMP50	{LNXT:353|354|-1}
+(*) INT
+005BAFC0  F8DF 7350		ldr r7, [pc, #+848] ; 0x1A8
+005BAFC4  53F0     		strh r0, [r6, +r7]
+
+#975				LD		QRPtr	{LNXT:353|354|-1}
+(*) UNDEF
+005BAFC6  F85F 75DC		ldr r7, [pc, #-1500] ; 0x10C
+005BAFCA  59F0     		ldr r0, [r6, +r7]
+
+#976				Sysfwrite		$$TMP50, 1, TCPClient.File	{LNXT:353|354|-1}
+(-) @BYTE
+005BAFCC  F85F 75B4		ldr r7, [pc, #-1460] ; 0x134
+005BAFD0  59F3     		ldr r3, [r6, +r7]
+005BAFD2  2201     		mov r2, #1 ; 1
+005BAFD4  F8DF 733C		ldr r7, [pc, #+828] ; 0x1A8
+005BAFD8  5FF1     		ldrsh r1, [r6, +r7]
+005BAFDA  4600     		mov r0, r0
+005BAFDC  F8DF 4348		ldr r4, [pc, #+840] ; 0x498DC9
+005BAFE0  F044 0401		orr r4, r4, #1
+005BAFE4  47A0     		blx r4
+
+#977				ST		i	{LNXT:353|354|-1}
+(*) INT
+005BAFE6  F85F 75C0		ldr r7, [pc, #-1472] ; 0x144
+005BAFEA  51F0     		str r0, [r6, +r7]
+
+#978		
+#979				(* i:=Sysfputc(TO_INT(16#0D), TCPClient.File); *)
+#980				LD		16#0D	{LNXT:354|355|-1}
+(-) UNDEF
+005BAFEC  200D     		mov r0, #13 ; 13
+
+#981				TO_INT	{LNXT:354|355|-1}
+(-) USINT
+#982				Sysfputc		TCPClient.File	{LNXT:354|355|-1}
+(-) INT
+005BAFEE  F85F 75D4		ldr r7, [pc, #-1492] ; 0x134
+005BAFF2  59F1     		ldr r1, [r6, +r7]
+005BAFF4  4600     		mov r0, r0
+005BAFF6  F8DF 432C		ldr r4, [pc, #+812] ; 0x498D01
+005BAFFA  F044 0401		orr r4, r4, #1
+005BAFFE  47A0     		blx r4
+
+#983				ST		i	{LNXT:354|355|-1}
+(*) INT
+005BB000  F85F 75DC		ldr r7, [pc, #-1500] ; 0x144
+005BB004  51F0     		str r0, [r6, +r7]
+
+#984		
+#985				(* i:=SysFOBfFlush(TCPClient.File); *)
+#986				LD		TCPClient.File	{LNXT:355|356|-1}
+(*) UNDEF
+005BB006  F85F 75EC		ldr r7, [pc, #-1516] ; 0x134
+005BB00A  59F0     		ldr r0, [r6, +r7]
+
+#987				SysFOBfFlush	{LNXT:355|356|-1}
+(-) UDINT
+005BB00C  4600     		mov r0, r0
+005BB00E  F8DF 4330		ldr r4, [pc, #+816] ; 0x499049
+005BB012  F044 0401		orr r4, r4, #1
+005BB016  47A0     		blx r4
+
+#988				ST		i	{LNXT:355|356|-1}
+(*) BOOL
+005BB018  F85F 75F4		ldr r7, [pc, #-1524] ; 0x144
+005BB01C  51F0     		str r0, [r6, +r7]
+
+#989		
+#990		
+#991				(* IF SpyOn *)
+#992				LD		SpyOn	{LNXT:356|-1|-1}
+(*) UNDEF
+005BB01E  F85F 75DC		ldr r7, [pc, #-1500] ; 0x155
+005BB022  5DF0     		ldrb r0, [r6, +r7]
+
+#993				JMPCN	$label50	{LNXT:356|356|357}
+(-) BOOL
+005BB024  2800     		cmp r0, #0
+005BB026  D016     		beq #44 ; 0x005BB056
+
+
+#994		
+#995				(* THEN *)
+#996		
+#997					(* i:=SysSpyData(SPY_ASCII, 16#00000001, ADR('Tx'), QRPtr); *)
+#998					ADR		'Tx'	{LNXT:356|357|-1}
+(*) BOOL
+005BB02A  F8DF 0334		ldr r0, [pc, #+820] ; 0x5BA164
+
+#999					ST		$$TMP4	{LNXT:356|357|-1}
+(*) DWORD
+005BB02E  F85F 75BC		ldr r7, [pc, #-1468] ; 0x190
+005BB032  51F0     		str r0, [r6, +r7]
+
+#1000					LD		SPY_ASCII	{LNXT:356|357|-1}
+(-) UNDEF
+005BB034  2001     		mov r0, #1 ; 1
+
+#1001					SysSpyData		16#00000001, $$TMP4, QRPtr	{LNXT:356|357|-1}
+(-) USINT
+005BB036  F85F 764C		ldr r7, [pc, #-1612] ; 0x10C
+005BB03A  59F3     		ldr r3, [r6, +r7]
+005BB03C  F85F 75CC		ldr r7, [pc, #-1484] ; 0x190
+005BB040  59F2     		ldr r2, [r6, +r7]
+005BB042  2101     		mov r1, #1 ; 1
+005BB044  4600     		mov r0, r0
+005BB046  F85F 45B4		ldr r4, [pc, #-1460] ; 0x497F99
+005BB04A  F044 0401		orr r4, r4, #1
+005BB04E  47A0     		blx r4
+
+#1002					ST		i	{LNXT:356|357|-1}
+(*) BOOL
+005BB050  F85F 762C		ldr r7, [pc, #-1580] ; 0x144
+005BB054  51F0     		str r0, [r6, +r7]
+
+#1003		
+#1004		$label50:
+#1005				(* END_IF *)
+#1006		
+#1007				(* CaseNr:=CaseNr+1; *)
+#1008				LD		CaseNr	{LNXT:357|-1|-1}
+(*) UNDEF
+005BB056  F85F 7678		ldr r7, [pc, #-1656] ; 0x102
+005BB05A  5DF0     		ldrb r0, [r6, +r7]
+
+#1009				ADD		1	{LNXT:357|-1|-1}
+(-) USINT
+005BB05C  1C40     		add r0, r0, #1
+
+#1010				ST		CaseNr	{LNXT:357|-1|-1}
+(*) USINT
+005BB05E  F85F 7680		ldr r7, [pc, #-1664] ; 0x102
+005BB062  55F0     		strb r0, [r6, +r7]
+
+#1011				JMP		$label10	{LNXT:351|-1|-1}
+(-) USINT
+005BB064  E136     		b #620 ; 0x005BB2D4
+
+
+#1012		
+#1013		$label21:
+#1014		
+#1015				(* IF TCPClient.File) <> TO_INT(SysGetTxBSize(TCPClient.File *)
+#1016				LD		TCPClient.File	{LNXT:363|-1|-1}
+(*) UNDEF
+005BB068  F85F 7650		ldr r7, [pc, #-1616] ; 0x134
+005BB06C  59F0     		ldr r0, [r6, +r7]
+
+#1017				SysGetOSpace	{LNXT:363|-1|-1}
+(-) UDINT
+005BB06E  4600     		mov r0, r0
+005BB070  F8DF 42BC		ldr r4, [pc, #+700] ; 0x498E89
+005BB074  F044 0401		orr r4, r4, #1
+005BB078  47A0     		blx r4
+
+#1018				NE(		TCPClient.File	{LNXT:363|-1|-1}
+(*) INT
+005BB07A  B082     		sub sp, sp, #8
+005BB07C  F8CD 0000		str r0, [sp]
+005BB080  F85F 7668		ldr r7, [pc, #-1640] ; 0x134
+005BB084  59F0     		ldr r0, [r6, +r7]
+
+#1019				SysGetTxBSize	{LNXT:363|-1|-1}
+(-) UDINT
+005BB086  4600     		mov r0, r0
+005BB088  F8DF 42A8		ldr r4, [pc, #+680] ; 0x498F39
+005BB08C  F044 0401		orr r4, r4, #1
+005BB090  47A0     		blx r4
+
+#1020				TO_INT	{LNXT:363|-1|-1}
+(-) UDINT
+005BB092  B200     		sxth r0, r0
+
+#1021				)	{LNXT:363|-1|-1}
+(*) INT
+005BB094  4607     		mov r7, r0
+005BB096  F8DD 0000		ldr r0, [sp]
+005BB09A  B002     		add sp, sp, #8
+005BB09C  42B8     		cmp r0, r7
+005BB09E  BF08 2000		eqmov r0, #0
+005BB0A2  BF18 2001		nemov r0, #1
+
+#1022				JMPCN	$label51	{LNXT:363|363|364}
+(-) BOOL
+005BB0A6  2800     		cmp r0, #0
+005BB0A8  D002     		beq #4 ; 0x005BB0B0
+
+
+#1023		
+#1024				(* THEN *)
+#1025		
+#1026					(* RETURN *)
+#1027					RET
+#1028		
+(-) BOOL
+005BB0AC  E112     		b #548 ; 0x005BB2D4
+
+
+#1029		$label51:
+#1030				(* END_IF *)
+#1031		
+#1032				(* CaseNr:=220; *)
+#1033				MOVE		220,CaseNr	{LNXT:364|-1|-1}
+(*) BOOL
+005BB0B0  20DC     		mov r0, #220 ; 220
+005BB0B2  F85F 76D4		ldr r7, [pc, #-1748] ; 0x102
+005BB0B6  55F0     		strb r0, [r6, +r7]
+
+#1034				JMP		$label10	{LNXT:1|-1|-1}
+(-) USINT
+005BB0B8  E10C     		b #536 ; 0x005BB2D4
+
+
+#1035		
+#1036		$label22:
+#1037		
+#1038				(* IF TCPClient.File) = 0 *)
+#1039				LD		TCPClient.File	{LNXT:372|-1|-1}
+(*) UNDEF
+005BB0BC  F85F 76A4		ldr r7, [pc, #-1700] ; 0x134
+005BB0C0  59F0     		ldr r0, [r6, +r7]
+
+#1040				SysGetIChars	{LNXT:372|-1|-1}
+(-) UDINT
+005BB0C2  4600     		mov r0, r0
+005BB0C4  F8DF 4264		ldr r4, [pc, #+612] ; 0x498E31
+005BB0C8  F044 0401		orr r4, r4, #1
+005BB0CC  47A0     		blx r4
+
+#1041				EQ		0	{LNXT:372|-1|-1}
+(*) INT
+005BB0CE  2800     		cmp r0, #0
+005BB0D0  BF18 2000		nemov r0, #0
+005BB0D4  BF08 2001		eqmov r0, #1
+
+#1042				JMPCN	$label52	{LNXT:372|372|373}
+(-) BOOL
+005BB0D8  2800     		cmp r0, #0
+005BB0DA  D002     		beq #4 ; 0x005BB0E2
+
+
+#1043		
+#1044				(* THEN *)
+#1045		
+#1046					(* RETURN *)
+#1047					RET
+#1048		
+(-) BOOL
+005BB0DE  E0F9     		b #498 ; 0x005BB2D4
+
+
+#1049		$label52:
+#1050				(* END_IF *)
+#1051		
+#1052				(* TimeBf[2]:=SysGetSysTime(TRUE); *)
+#1053				LD		TRUE	{LNXT:373|374|-1}
+(-) UNDEF
+005BB0E2  2001     		mov r0, #1 ; 1
+
+#1054				SysGetSysTime	{LNXT:373|374|-1}
+(-) BOOL
+005BB0E4  4600     		mov r0, r0
+005BB0E6  F85F 4650		ldr r4, [pc, #-1616] ; 0x4986AD
+005BB0EA  F044 0401		orr r4, r4, #1
+005BB0EE  47A0     		blx r4
+
+#1055				ST		TimeBf[2]	{LNXT:373|374|-1}
+(*) UDINT
+005BB0F0  F8DF 71EC		ldr r7, [pc, #+492] ; 0x140
+005BB0F4  51F0     		str r0, [r6, +r7]
+
+#1056		
+#1057				(* RxChrs:=0; *)
+#1058				MOVE		0,RxChrs	{LNXT:374|375|-1}
+(*) UDINT
+005BB0F6  2000     		mov r0, #0 ; 0
+005BB0F8  F8DF 71E0		ldr r7, [pc, #+480] ; 0x10A
+005BB0FC  53F0     		strh r0, [r6, +r7]
+
+#1059		
+#1060				(* i:=Sysmemset(ADR(ABf), 0, SIZEOF(ABf)); *)
+#1061				ADR		ABf	{LNXT:375|376|-1}
+(-) UINT
+005BB0FE  4630     		mov r0, r6
+
+#1062				Sysmemset		0, SIZE#ABf	{LNXT:375|376|-1}
+(-) DWORD
+005BB100  F8DF 7280		ldr r7, [pc, #+640] ; 0x5BA1A4
+005BB104  683A     		ldr r2, [r7]
+005BB106  2100     		mov r1, #0 ; 0
+005BB108  4600     		mov r0, r0
+005BB10A  F8DF 420C		ldr r4, [pc, #+524] ; 0x49895D
+005BB10E  F044 0401		orr r4, r4, #1
+005BB112  47A0     		blx r4
+
+#1063				ST		i	{LNXT:375|376|-1}
+(*) @USINT
+005BB114  F85F 76F0		ldr r7, [pc, #-1776] ; 0x144
+005BB118  51F0     		str r0, [r6, +r7]
+
+#1064		
+#1065				(* CaseNr:=CaseNr+1; *)
+#1066				LD		CaseNr	{LNXT:376|-1|-1}
+(*) UNDEF
+005BB11A  F85F 773C		ldr r7, [pc, #-1852] ; 0x102
+005BB11E  5DF0     		ldrb r0, [r6, +r7]
+
+#1067				ADD		1	{LNXT:376|-1|-1}
+(-) USINT
+005BB120  1C40     		add r0, r0, #1
+
+#1068				ST		CaseNr	{LNXT:376|-1|-1}
+(*) USINT
+005BB122  F85F 7744		ldr r7, [pc, #-1860] ; 0x102
+005BB126  55F0     		strb r0, [r6, +r7]
+
+#1069				JMP		$label10	{LNXT:1|-1|-1}
+(-) USINT
+005BB128  E0D4     		b #424 ; 0x005BB2D4
+
+
+#1070		
+#1071		$label23:
+#1072		
+#1073				(* IF TCPClient.File) = 0 *)
+#1074				LD		TCPClient.File	{LNXT:382|-1|-1}
+(*) UNDEF
+005BB12C  F85F 7714		ldr r7, [pc, #-1812] ; 0x134
+005BB130  59F0     		ldr r0, [r6, +r7]
+
+#1075				SysGetIChars	{LNXT:382|-1|-1}
+(-) UDINT
+005BB132  4600     		mov r0, r0
+005BB134  F8DF 41F4		ldr r4, [pc, #+500] ; 0x498E31
+005BB138  F044 0401		orr r4, r4, #1
+005BB13C  47A0     		blx r4
+
+#1076				EQ		0	{LNXT:382|-1|-1}
+(*) INT
+005BB13E  2800     		cmp r0, #0
+005BB140  BF18 2000		nemov r0, #0
+005BB144  BF08 2001		eqmov r0, #1
+
+#1077				JMPCN	$label53	{LNXT:382|383|389}
+(-) BOOL
+005BB148  2800     		cmp r0, #0
+005BB14A  D01F     		beq #62 ; 0x005BB18C
+
+
+#1078		
+#1079				(* THEN *)
+#1080		
+#1081		
+#1082					(* IF TRUE)-TimeBf[2]) > 1000000 *)
+#1083					LD		TRUE	{LNXT:383|-1|-1}
+(-) UNDEF
+005BB14E  2001     		mov r0, #1 ; 1
+
+#1084					SysGetSysTime	{LNXT:383|-1|-1}
+(-) BOOL
+005BB150  4600     		mov r0, r0
+005BB152  F85F 46BC		ldr r4, [pc, #-1724] ; 0x4986AD
+005BB156  F044 0401		orr r4, r4, #1
+005BB15A  47A0     		blx r4
+
+#1085					SUB		TimeBf[2]	{LNXT:383|-1|-1}
+(*) UDINT
+005BB15C  F8DF 7180		ldr r7, [pc, #+384] ; 0x140
+005BB160  59F7     		ldr r7, [r6, +r7]
+005BB162  1BC0     		sub r0, r0, r7
+
+#1086					GT		1000000	{LNXT:383|-1|-1}
+(*) UDINT
+005BB164  F85F 76B0		ldr r7, [pc, #-1712] ; 0x5BA0AC
+005BB168  683F     		ldr r7, [r7]
+005BB16A  42B8     		cmp r0, r7
+005BB16C  BF98 2000		lsmov r0, #0
+005BB170  BF88 2001		himov r0, #1
+
+#1087					JMPCN	$label54	{LNXT:383|383|384}
+(-) BOOL
+005BB174  2800     		cmp r0, #0
+005BB176  D007     		beq #14 ; 0x005BB188
+
+
+#1088		
+#1089					(* THEN *)
+#1090		
+#1091						(* CaseNr:=CaseNr+1; *)
+#1092						LD		CaseNr	{LNXT:383|384|-1}
+(*) UNDEF
+005BB17A  F85F 779C		ldr r7, [pc, #-1948] ; 0x102
+005BB17E  5DF0     		ldrb r0, [r6, +r7]
+
+#1093						ADD		1	{LNXT:383|384|-1}
+(-) USINT
+005BB180  1C40     		add r0, r0, #1
+
+#1094						ST		CaseNr	{LNXT:383|384|-1}
+(*) USINT
+005BB182  F85F 77A4		ldr r7, [pc, #-1956] ; 0x102
+005BB186  55F0     		strb r0, [r6, +r7]
+
+#1095		
+#1096		$label54:
+#1097					(* END_IF *)
+#1098		
+#1099					(* RETURN *)
+#1100					RET
+#1101		
+(-) USINT
+005BB188  E0A4     		b #328 ; 0x005BB2D4
+
+
+#1102		$label53:
+#1103				(* END_IF *)
+#1104		
+#1105				(* WHILE TCPClient.File) <> 0 *)
+#1106		$label55:
+#1107				LD		TCPClient.File	{LNXT:389|-1|-1}
+(*) UNDEF
+005BB18C  F85F 7774		ldr r7, [pc, #-1908] ; 0x134
+005BB190  59F0     		ldr r0, [r6, +r7]
+
+#1108				SysGetIChars	{LNXT:389|-1|-1}
+(-) UDINT
+005BB192  4600     		mov r0, r0
+005BB194  F8DF 4194		ldr r4, [pc, #+404] ; 0x498E31
+005BB198  F044 0401		orr r4, r4, #1
+005BB19C  47A0     		blx r4
+
+#1109				NE		0	{LNXT:389|-1|-1}
+(*) INT
+005BB19E  2800     		cmp r0, #0
+005BB1A0  BF08 2000		eqmov r0, #0
+005BB1A4  BF18 2001		nemov r0, #1
+
+#1110				JMPCN		$label56	{LNXT:389|390|399}
+(-) BOOL
+005BB1A8  2800     		cmp r0, #0
+005BB1AA  D03D     		beq #122 ; 0x005BB228
+
+
+#1111		
+#1112				(* DO *)
+#1113					(* TimeBf[2]:=SysGetSysTime(TRUE); *)
+#1114					LD		TRUE	{LNXT:390|391|-1}
+(-) UNDEF
+005BB1AE  2001     		mov r0, #1 ; 1
+
+#1115					SysGetSysTime	{LNXT:390|391|-1}
+(-) BOOL
+005BB1B0  4600     		mov r0, r0
+005BB1B2  F85F 471C		ldr r4, [pc, #-1820] ; 0x4986AD
+005BB1B6  F044 0401		orr r4, r4, #1
+005BB1BA  47A0     		blx r4
+
+#1116					ST		TimeBf[2]	{LNXT:390|391|-1}
+(*) UDINT
+005BB1BC  F8DF 7120		ldr r7, [pc, #+288] ; 0x140
+005BB1C0  51F0     		str r0, [r6, +r7]
+
+#1117		
+#1118					(* QRPtr:=ABf+RxChrs; *)
+#1119					LD		ABf	{LNXT:391|392|-1}
+(-) UNDEF
+005BB1C2  4630     		mov r0, r6
+
+#1120					ADD		RxChrs	{LNXT:391|392|-1}
+(*) STRING
+005BB1C4  F8DF 7114		ldr r7, [pc, #+276] ; 0x10A
+005BB1C8  5BF7     		ldrh r7, [r6, +r7]
+005BB1CA  19C0     		add r0, r0, r7
+
+#1121					ST		QRPtr	{LNXT:391|392|-1}
+(*) UINT
+005BB1CC  F85F 77E4		ldr r7, [pc, #-2020] ; 0x10C
+005BB1D0  51F0     		str r0, [r6, +r7]
+
+#1122		
+#1123					(* @QRPtr:=TO_USINT(Sysfgetc(TCPClient.File)); *)
+#1124					LD		TCPClient.File	{LNXT:392|393|-1}
+(*) UNDEF
+005BB1D2  F85F 77B8		ldr r7, [pc, #-1976] ; 0x134
+005BB1D6  59F0     		ldr r0, [r6, +r7]
+
+#1125					Sysfgetc	{LNXT:392|393|-1}
+(-) UDINT
+005BB1D8  4600     		mov r0, r0
+005BB1DA  F8DF 4144		ldr r4, [pc, #+324] ; 0x498CA5
+005BB1DE  F044 0401		orr r4, r4, #1
+005BB1E2  47A0     		blx r4
+
+#1126					TO_USINT	{LNXT:392|393|-1}
+(-) INT
+#1127					ST		@QRPtr	{LNXT:392|393|-1}
+(*) USINT
+005BB1E4  F85F 77FC		ldr r7, [pc, #-2044] ; 0x10C
+005BB1E8  F856 C007		ldr r12, [r6, +r7]
+005BB1EC  F88C 0000		strb r0, [r12]
+
+#1128		
+#1129					(* RxChrs:=RxChrs+1; *)
+#1130					LD		RxChrs	{LNXT:393|394|-1}
+(*) UNDEF
+005BB1F0  F8DF 70E8		ldr r7, [pc, #+232] ; 0x10A
+005BB1F4  5BF0     		ldrh r0, [r6, +r7]
+
+#1131					ADD		1	{LNXT:393|394|-1}
+(-) UINT
+005BB1F6  1C40     		add r0, r0, #1
+
+#1132					ST		RxChrs	{LNXT:393|394|-1}
+(*) UINT
+005BB1F8  F8DF 70E0		ldr r7, [pc, #+224] ; 0x10A
+005BB1FC  53F0     		strh r0, [r6, +r7]
+
+#1133		
+#1134		
+#1135					(* IF RxChrs > SIZEOF(ABf *)
+#1136					LD		RxChrs	{LNXT:394|-1|-1}
+(*) UNDEF
+005BB1FE  F8DF 70DC		ldr r7, [pc, #+220] ; 0x10A
+005BB202  5BF0     		ldrh r0, [r6, +r7]
+
+#1137					GT		SIZE#ABf	{LNXT:394|-1|-1}
+(*) UINT
+005BB204  F8DF 7180		ldr r7, [pc, #+384] ; 0x5BA1A8
+005BB208  683F     		ldr r7, [r7]
+005BB20A  42B8     		cmp r0, r7
+005BB20C  BF98 2000		lsmov r0, #0
+005BB210  BF88 2001		himov r0, #1
+
+#1138					JMPCN	$label57	{LNXT:394|394|389}
+(-) BOOL
+005BB214  2800     		cmp r0, #0
+005BB216  D006     		beq #12 ; 0x005BB226
+
+
+#1139		
+#1140					(* THEN *)
+#1141		
+#1142						(* ErrorNr:=10; *)
+#1143						MOVE		10,ErrorNr	{LNXT:394|394|-1}
+(*) BOOL
+005BB21A  200A     		mov r0, #10 ; 10
+005BB21C  F85F 7838		ldr r7, [pc, #-2104] ; 0x108
+005BB220  55F0     		strb r0, [r6, +r7]
+
+#1144		
+#1145						(* RETURN *)
+#1146						RET
+#1147		
+(-) USINT
+005BB222  E057     		b #174 ; 0x005BB2D4
+
+
+#1148		$label57:
+#1149					(* END_IF *)
+#1150					JMP		$label55	{LNXT:389|390|399}
+(-) USINT
+005BB226  E7B1     		b #-158 ; 0x005BB18C
+
+#1151		
+#1152		$label56:
+#1153				(* END_WHILE *)
+#1154		
+#1155		
+#1156				(* IF ETPtr) > 0 *)
+#1157				LD		ETPtr	{LNXT:399|-1|-1}
+(*) UNDEF
+005BB228  F85F 7848		ldr r7, [pc, #-2120] ; 0x104
+005BB22C  59F0     		ldr r0, [r6, +r7]
+
+#1158				Sysstrlen	{LNXT:399|-1|-1}
+(-) @BYTE
+005BB22E  4600     		mov r0, r0
+005BB230  F8DF 40E8		ldr r4, [pc, #+232] ; 0x498BB1
+005BB234  F044 0401		orr r4, r4, #1
+005BB238  47A0     		blx r4
+
+#1159				GT		0	{LNXT:399|-1|-1}
+(*) UDINT
+005BB23A  2800     		cmp r0, #0
+005BB23C  BF98 2000		lsmov r0, #0
+005BB240  BF88 2001		himov r0, #1
+
+#1160				JMPCN	$label58	{LNXT:399|400|-1}
+(-) BOOL
+005BB244  2800     		cmp r0, #0
+005BB246  D01D     		beq #58 ; 0x005BB284
+
+
+#1161		
+#1162				(* THEN *)
+#1163		
+#1164		
+#1165					(* IF ABf), ETPtr, FIND_DEFAULT) <> NULL *)
+#1166					ADR		ABf	{LNXT:400|-1|-1}
+(-) BOOL
+005BB24A  4630     		mov r0, r6
+
+#1167					SysStrFind		ETPtr, FIND_DEFAULT	{LNXT:400|-1|-1}
+(-) DWORD
+005BB24C  2200     		mov r2, #0 ; 0
+005BB24E  F85F 786C		ldr r7, [pc, #-2156] ; 0x104
+005BB252  59F1     		ldr r1, [r6, +r7]
+005BB254  4600     		mov r0, r0
+005BB256  F85F 47BC		ldr r4, [pc, #-1980] ; 0x498A95
+005BB25A  F044 0401		orr r4, r4, #1
+005BB25E  47A0     		blx r4
+
+#1168					NE		NULL	{LNXT:400|-1|-1}
+(*) @USINT
+005BB260  2700     		mov r7, #0 ; 0
+005BB262  42B8     		cmp r0, r7
+005BB264  BF08 2000		eqmov r0, #0
+005BB268  BF18 2001		nemov r0, #1
+
+#1169					JMPCN	$label59	{LNXT:400|400|401}
+(-) BOOL
+005BB26C  2800     		cmp r0, #0
+005BB26E  D007     		beq #14 ; 0x005BB280
+
+
+#1170		
+#1171					(* THEN *)
+#1172		
+#1173						(* CaseNr:=CaseNr+1; *)
+#1174						LD		CaseNr	{LNXT:400|401|-1}
+(*) UNDEF
+005BB272  F85F 7894		ldr r7, [pc, #-2196] ; 0x102
+005BB276  5DF0     		ldrb r0, [r6, +r7]
+
+#1175						ADD		1	{LNXT:400|401|-1}
+(-) USINT
+005BB278  1C40     		add r0, r0, #1
+
+#1176						ST		CaseNr	{LNXT:400|401|-1}
+(*) USINT
+005BB27A  F85F 789C		ldr r7, [pc, #-2204] ; 0x102
+005BB27E  55F0     		strb r0, [r6, +r7]
+
+#1177		
+#1178		$label59:
+#1179					(* END_IF *)
+#1180		
+#1181					(* RETURN *)
+#1182					RET
+#1183		
+(-) USINT
+005BB280  E028     		b #80 ; 0x005BB2D4
+
+
+#1184		$label58:
+#1185				(* END_IF *)
+#1186				JMP		$label10	{LNXT:1|-1|-1}
+(-) USINT
+005BB284  E026     		b #76 ; 0x005BB2D4
+
+
+#1187		
+#1188		$label24:
+#1189		
+#1190				(* IF SpyOn *)
+#1191				LD		SpyOn	{LNXT:408|-1|-1}
+(*) UNDEF
+005BB288  F85F 7848		ldr r7, [pc, #-2120] ; 0x155
+005BB28C  5DF0     		ldrb r0, [r6, +r7]
+
+#1192				JMPCN	$label60	{LNXT:408|408|409}
+(-) BOOL
+005BB28E  2800     		cmp r0, #0
+005BB290  D01A     		beq #52 ; 0x005BB2C8
+
+
+#1193		
+#1194				(* THEN *)
+#1195		
+#1196					(* i:=SysSpyData(SPY_ASCII, 16#00000002, ADR('Rx'), ADR(ABf)); *)
+#1197					ADR		'Rx'	{LNXT:408|409|-1}
+(*) BOOL
+005BB294  F8DF 00CC		ldr r0, [pc, #+204] ; 0x5BA168
+
+#1198					ST		$$TMP4	{LNXT:408|409|-1}
+(*) DWORD
+005BB298  F85F 7828		ldr r7, [pc, #-2088] ; 0x190
+005BB29C  51F0     		str r0, [r6, +r7]
+
+#1199					ADR		ABf	{LNXT:408|409|-1}
+(-) DWORD
+005BB29E  4630     		mov r0, r6
+
+#1200					ST		$$TMP5	{LNXT:408|409|-1}
+(*) DWORD
+005BB2A0  F85F 782C		ldr r7, [pc, #-2092] ; 0x194
+005BB2A4  51F0     		str r0, [r6, +r7]
+
+#1201					LD		SPY_ASCII	{LNXT:408|409|-1}
+(-) UNDEF
+005BB2A6  2001     		mov r0, #1 ; 1
+
+#1202					SysSpyData		16#00000002, $$TMP4, $$TMP5	{LNXT:408|409|-1}
+(-) USINT
+005BB2A8  F85F 7834		ldr r7, [pc, #-2100] ; 0x194
+005BB2AC  59F3     		ldr r3, [r6, +r7]
+005BB2AE  F85F 783C		ldr r7, [pc, #-2108] ; 0x190
+005BB2B2  59F2     		ldr r2, [r6, +r7]
+005BB2B4  2102     		mov r1, #2 ; 2
+005BB2B6  4600     		mov r0, r0
+005BB2B8  F85F 4828		ldr r4, [pc, #-2088] ; 0x497F99
+005BB2BC  F044 0401		orr r4, r4, #1
+005BB2C0  47A0     		blx r4
+
+#1203					ST		i	{LNXT:408|409|-1}
+(*) BOOL
+005BB2C2  F85F 789C		ldr r7, [pc, #-2204] ; 0x144
+005BB2C6  51F0     		str r0, [r6, +r7]
+
+#1204		
+#1205		$label60:
+#1206				(* END_IF *)
+#1207		
+#1208				(* CaseNr:=CaseBk; *)
+#1209				MOVE		CaseBk,CaseNr	{LNXT:409|-1|-1}
+(*) UDINT
+005BB2C8  F85F 78F0		ldr r7, [pc, #-2288] ; 0x101
+005BB2CC  5DF0     		ldrb r0, [r6, +r7]
+005BB2CE  F85F 78F0		ldr r7, [pc, #-2288] ; 0x102
+005BB2D2  55F0     		strb r0, [r6, +r7]
+
+005BB2D4  E8BD 4040		ldmia sp!, { r6, lr }
+
+005BB2D8  4770     		bx lr
+
+005BB2DC  0000010A		; 0x0000010A
+005BB2E0  00000140		; 0x00000140
+005BB2E4  00000164		; 0x00000164
+005BB2E8  00000166		; 0x00000166
+005BB2EC  00000168		; 0x00000168
+005BB2F0  0000016A		; 0x0000016A
+005BB2F4  0000016C		; 0x0000016C
+005BB2F8  00000181		; 0x00000181
+005BB2FC  00000182		; 0x00000182
+005BB300  00000184		; 0x00000184
+005BB304  00000186		; 0x00000186
+005BB308  00000188		; 0x00000188
+005BB30C  000001A0		; 0x000001A0
+005BB310  000001A4		; 0x000001A4
+005BB314  000001A8		; 0x000001A8
+005BB318  0049895D		; 0x0049895D
+005BB31C  00498BB1		; 0x00498BB1
+005BB320  00498CA5		; 0x00498CA5
+005BB324  00498D01		; 0x00498D01
+005BB328  00498DC9		; 0x00498DC9
+005BB32C  00498E31		; 0x00498E31
+005BB330  00498E89		; 0x00498E89
+005BB334  00498F39		; 0x00498F39
+005BB338  00498F91		; 0x00498F91
+005BB33C  00498FED		; 0x00498FED
+005BB340  00499049		; 0x00499049
+005BB344  005BA120		; 0x005BA120
+005BB348  005BA128		; 0x005BA128
+005BB34C  005BA130		; 0x005BA130
+005BB350  005BA134		; 0x005BA134
+005BB354  005BA144		; 0x005BA144
+005BB358  005BA148		; 0x005BA148
+005BB35C  005BA158		; 0x005BA158
+005BB360  005BA164		; 0x005BA164
+005BB364  005BA168		; 0x005BA168
+005BB368  005BA188		; 0x005BA188
+005BB36C  005BA18C		; 0x005BA18C
+005BB370  005BA190		; 0x005BA190
+005BB374  005BA194		; 0x005BA194
+005BB378  005BA198		; 0x005BA198
+005BB37C  005BA19C		; 0x005BA19C
+005BB380  005BA1A0		; 0x005BA1A0
+005BB384  005BA1A4		; 0x005BA1A4
+005BB388  005BA1A8		; 0x005BA1A8
+
+
+Frame allocation:
+
+	0000       : VAR ABf
+	0101       : VAR CaseBk
+	0102       : VAR CaseNr
+	0104       : VAR ETPtr
+	0108       : VAR ErrorNr
+	010A       : VAR RxChrs
+	010C       : VAR QRPtr
+	0110       : FB TCPClient
+	0138       : VAR TimeBf
+	0144       : VAR i
+	0148       : VAR ScanfAdd
+	014C       : VAR ScanfData
+	014D bit  0: VAR CSPulse
+	0150       : VAR RxDLength
+	0154 bit  0: VAR Enable
+	0155 bit  0: VAR SpyOn
+	0156 bit  0: VAR CSend
+	0158       : VAR DeviceIP
+	015C       : VAR DevicePort
+	0160       : VAR PollTime
+	0164       : VAR IAction
+	0166       : VAR ITSyn
+	0168       : VAR ITLow
+	016A       : VAR ITHigh
+	016C       : VAR ICode
+	0170 bit  0: VAR Connected
+	0171 bit  0: VAR Fault
+	0172 bit  0: VAR SensorOk
+	0174       : VAR ErrorCtr
+	0178       : VAR RSSI
+	017C       : VAR Button
+	0181       : VAR OAction
+	0182       : VAR OTSyn
+	0184       : VAR OTLow
+	0186       : VAR OTHigh
+	0188       : VAR OCode
+
+END_FUNCTION_BLOCK
+**************************************************
+	List program: CodeClone
+**************************************************
+
+PROGRAM CodeClone
+
+        VAR
+RFBridge : RFBridgeInterface;	{ DE:"RF Bridge module communication" }
+Ping : SysIPReach;	{ DE:"RF Bridge module ping" }
+	END_VAR
+
+END_PROGRAM
+
+005BB390  E92D 4DF0		stmdb sp!, { r4, r5, r6, r7, r8, r10, r11, lr }
+
+#0		{SRC:CodeClone}
+#1		
+#2		
+#3		
+#4		(*** Network 1 ***)
+#5		
+#6			(*	The last code received is cloned and retransmit at every Di01CPU set	*)
+#7		
+#8		(* Call for FB SysIPReach instance Ping *)
+#9		MOVE	Di00CPU,Ping.Enable	{R:"1$FB:Ping"}
+(*) UDINT
+005BB394  F8DF 710C		ldr r7, [pc, #+268] ; 0x20417D18
+005BB398  7838     		ldrb r0, [r7]
+005BB39A  F8DF 7114		ldr r7, [pc, #+276] ; 0x20417D24
+005BB39E  7038     		strb r0, [r7]
+
+#10		MOVE	'192.168.0.183',Ping.PeerIP	{R:"1$FB:Ping"}
+(*) BOOL
+005BB3A0  F8DF 70F4		ldr r7, [pc, #+244] ; 0x5BA16C
+005BB3A4  4638     		mov r0, r7
+005BB3A6  B082     		sub sp, sp, #8
+005BB3A8  F8CD 0000		str r0, [sp]
+005BB3AC  E92D 0006		stmdb sp!, { r1, r2 }
+005BB3B0  2210     		mov r2, #16 ; 16
+005BB3B2  F8DF 1100		ldr r1, [pc, #+256] ; 0x20417D25
+005BB3B6  F8DF 40DC		ldr r4, [pc, #+220] ; 0x4AE6E9
+005BB3BA  F044 0401		orr r4, r4, #1
+005BB3BE  47A0     		blx r4
+005BB3C0  E8BD 0006		ldmia sp!, { r1, r2 }
+005BB3C4  F8DD 0000		ldr r0, [sp]
+005BB3C8  B002     		add sp, sp, #8
+
+#11		CAL	Ping	{R:"1$FB:Ping"}
+(*) STRING
+005BB3CA  E92D 0021		stmdb sp!, { r0, r5 }
+005BB3CE  F8DF 70DC		ldr r7, [pc, #+220] ; 0x20417D1C
+005BB3D2  4638     		mov r0, r7
+005BB3D4  F8DF 40B8		ldr r4, [pc, #+184] ; 0x495D9D
+005BB3D8  F044 0401		orr r4, r4, #1
+005BB3DC  47A0     		blx r4
+005BB3DE  E8BD 0021		ldmia sp!, { r0, r5 }
+
+#12		MOVE	Ping.Done,RFBridge.Enable	{R:"1$FB:Ping"}
+(*) STRING
+005BB3E2  F8DF 70D4		ldr r7, [pc, #+212] ; 0x20417D35
+005BB3E6  7838     		ldrb r0, [r7]
+005BB3E8  F8DF 70D4		ldr r7, [pc, #+212] ; 0x20417E8C
+005BB3EC  7038     		strb r0, [r7]
+
+#13		
+#14		(* Call for FB RFBridgeInterface instance RFBridge *)
+#15		
+#16			(* $$TMP0 := ADR('192.168.0.183'); *)
+#17			ADR		'192.168.0.183'	{R:"1$FB:RFBridge"}
+(*) BOOL
+005BB3EE  F8DF 00A8		ldr r0, [pc, #+168] ; 0x5BA16C
+
+#18			ST		$$TMP0	{R:"1$FB:RFBridge"}
+(*) DWORD
+005BB3F2  F8DF 7108		ldr r7, [pc, #+264] ; 0x20417EE4
+005BB3F6  6038     		str r0, [r7]
+
+#19		
+#20		MOVE	Ping.Done,RFBridge.Enable	{R:"1$FB:RFBridge"}
+(*) DWORD
+005BB3F8  F8DF 70BC		ldr r7, [pc, #+188] ; 0x20417D35
+005BB3FC  7838     		ldrb r0, [r7]
+005BB3FE  F8DF 70C0		ldr r7, [pc, #+192] ; 0x20417E8C
+005BB402  7038     		strb r0, [r7]
+
+#21		MOVE	TRUE,RFBridge.SpyOn	{R:"1$FB:RFBridge"}
+(*) BOOL
+005BB404  2001     		mov r0, #1 ; 1
+005BB406  F8DF 70BC		ldr r7, [pc, #+188] ; 0x20417E8D
+005BB40A  7038     		strb r0, [r7]
+
+#22		MOVE	Di01CPU,RFBridge.CSend	{R:"1$FB:RFBridge"}
+(*) BOOL
+005BB40C  F8DF 7098		ldr r7, [pc, #+152] ; 0x20417D19
+005BB410  7838     		ldrb r0, [r7]
+005BB412  F8DF 70B4		ldr r7, [pc, #+180] ; 0x20417E8E
+005BB416  7038     		strb r0, [r7]
+
+#23		MOVE	$$TMP0,RFBridge.DeviceIP	{R:"1$FB:RFBridge"}
+(*) BOOL
+005BB418  F8DF 70E0		ldr r7, [pc, #+224] ; 0x20417EE4
+005BB41C  6838     		ldr r0, [r7]
+005BB41E  F8DF 70AC		ldr r7, [pc, #+172] ; 0x20417E90
+005BB422  6038     		str r0, [r7]
+
+#24		MOVE	1000,RFBridge.DevicePort	{R:"1$FB:RFBridge"}
+(*) @STRING
+005BB424  F44F 707A		mov r0, #1000 ; 1000
+005BB428  F8DF 70A4		ldr r7, [pc, #+164] ; 0x20417E94
+005BB42C  8038     		strh r0, [r7]
+
+#25		MOVE	1.0,RFBridge.PollTime	{R:"1$FB:RFBridge"}
+(*) UINT
+005BB42E  F8DF 706C		ldr r7, [pc, #+108] ; 0x5BA17C
+005BB432  6838     		ldr r0, [r7]
+005BB434  F8DF 709C		ldr r7, [pc, #+156] ; 0x20417E98
+005BB438  6038     		str r0, [r7]
+
+#26		MOVE	16#A5,RFBridge.IAction	{R:"1$FB:RFBridge"}
+(*) REAL
+005BB43A  20A5     		mov r0, #165 ; 165
+005BB43C  F8DF 7098		ldr r7, [pc, #+152] ; 0x20417E9C
+005BB440  7038     		strb r0, [r7]
+
+#27		MOVE	RFBridge.OTSyn,RFBridge.ITSyn	{R:"1$FB:RFBridge"}
+(*) BYTE
+005BB442  F8DF 70A8		ldr r7, [pc, #+168] ; 0x20417EBA
+005BB446  8838     		ldrh r0, [r7]
+005BB448  F8DF 7090		ldr r7, [pc, #+144] ; 0x20417E9E
+005BB44C  8038     		strh r0, [r7]
+
+#28		MOVE	RFBridge.OTLow,RFBridge.ITLow	{R:"1$FB:RFBridge"}
+(*) UINT
+005BB44E  F8DF 70A0		ldr r7, [pc, #+160] ; 0x20417EBC
+005BB452  8838     		ldrh r0, [r7]
+005BB454  F8DF 7088		ldr r7, [pc, #+136] ; 0x20417EA0
+005BB458  8038     		strh r0, [r7]
+
+#29		MOVE	RFBridge.OTHigh,RFBridge.ITHigh	{R:"1$FB:RFBridge"}
+(*) UINT
+005BB45A  F8DF 7098		ldr r7, [pc, #+152] ; 0x20417EBE
+005BB45E  8838     		ldrh r0, [r7]
+005BB460  F8DF 7080		ldr r7, [pc, #+128] ; 0x20417EA2
+005BB464  8038     		strh r0, [r7]
+
+#30		MOVE	RFBridge.OCode,RFBridge.ICode	{R:"1$FB:RFBridge"}
+(*) UINT
+005BB466  F8DF 7090		ldr r7, [pc, #+144] ; 0x20417EC0
+005BB46A  6838     		ldr r0, [r7]
+005BB46C  F8DF 7078		ldr r7, [pc, #+120] ; 0x20417EA4
+005BB470  6038     		str r0, [r7]
+
+#31		CAL	RFBridge	{R:"1$FB:RFBridge"}
+(*) UDINT
+005BB472  E92D 0021		stmdb sp!, { r0, r5 }
+005BB476  F8DF 7044		ldr r7, [pc, #+68] ; 0x20417D38
+005BB47A  463D     		mov r5, r7
+005BB47C  F8DF 4020		ldr r4, [pc, #+32] ; 0x5BA1C8
+005BB480  F044 0401		orr r4, r4, #1
+005BB484  47A0     		blx r4
+005BB486  E8BD 0021		ldmia sp!, { r0, r5 }
+
+005BB48A  E8BD 4DF0		ldmia sp!, { r4, r5, r6, r7, r8, r10, r11, lr }
+
+005BB48E  4770     		bx lr
+
+005BB490  00495D9D		; 0x00495D9D
+005BB494  004AE6E9		; 0x004AE6E9
+005BB498  005BA16C		; 0x005BA16C
+005BB49C  005BA17C		; 0x005BA17C
+005BB4A0  005BA1C8		; 0x005BA1C8
+005BB4A4  20417D18		; 0x20417D18
+005BB4A8  20417D19		; 0x20417D19
+005BB4AC  20417D1C		; 0x20417D1C
+005BB4B0  20417D24		; 0x20417D24
+005BB4B4  20417D25		; 0x20417D25
+005BB4B8  20417D35		; 0x20417D35
+005BB4BC  20417D38		; 0x20417D38
+005BB4C0  20417E8C		; 0x20417E8C
+005BB4C4  20417E8D		; 0x20417E8D
+005BB4C8  20417E8E		; 0x20417E8E
+005BB4CC  20417E90		; 0x20417E90
+005BB4D0  20417E94		; 0x20417E94
+005BB4D4  20417E98		; 0x20417E98
+005BB4D8  20417E9C		; 0x20417E9C
+005BB4DC  20417E9E		; 0x20417E9E
+005BB4E0  20417EA0		; 0x20417EA0
+005BB4E4  20417EA2		; 0x20417EA2
+005BB4E8  20417EA4		; 0x20417EA4
+005BB4EC  20417EBA		; 0x20417EBA
+005BB4F0  20417EBC		; 0x20417EBC
+005BB4F4  20417EBE		; 0x20417EBE
+005BB4F8  20417EC0		; 0x20417EC0
+005BB4FC  20417EE4		; 0x20417EE4
+
+END_PROGRAM
+
+
+**************************************************
+	Target variable image generation
+**************************************************
+
+
+*** INPUT:
+005BB500  F8DF 7020		ldr r7, [pc, #+32] ; 0x2041B278
+005BB504  7838     		ldrb r0, [r7]
+005BB506  F8DF 7014		ldr r7, [pc, #+20] ; 0x20417D18
+005BB50A  7038     		strb r0, [r7]
+
+005BB50C  F8DF 7018		ldr r7, [pc, #+24] ; 0x2041B279
+005BB510  7838     		ldrb r0, [r7]
+005BB512  F8DF 700C		ldr r7, [pc, #+12] ; 0x20417D19
+005BB516  7038     		strb r0, [r7]
+
+005BB518  4770     		bx lr
+
+005BB51C  20417D18		; 0x20417D18
+005BB520  20417D19		; 0x20417D19
+005BB524  2041B278		; 0x2041B278
+005BB528  2041B279		; 0x2041B279
+
+
+*** OUTPUT:
+005BB52C  4770     		bx lr
+
+
+
+**************************************************
+	Task Back init code
+**************************************************
+
+005BB52E  E92D 4DF0		stmdb sp!, { r4, r5, r6, r7, r8, r10, r11, lr }
+
+005BB532  E8BD 4DF0		ldmia sp!, { r4, r5, r6, r7, r8, r10, r11, lr }
+
+005BB536  4770     		bx lr
+
+
+
+**************************************************
+	Global init code
+**************************************************
+
+005BB550  E92D 4DF0		stmdb sp!, { r4, r5, r6, r7, r8, r10, r11, lr }
+
+005BB554  E8BD 4DF0		ldmia sp!, { r4, r5, r6, r7, r8, r10, r11, lr }
+
+005BB558  4770     		bx lr
+
+
+
+********************************************
+MEMORY MAP
+********************************************
+
+Code area type:			main code
+Start code area:		  5BA000h
+End code area:			  5BB560h
+Code size:			    1560h
+
+Start local data area:		20417D0Ch
+End local data area:		20417EE8h
+Local data size:		     1DCh
+
+Start retentive data area:	20417920h
+End retentive data area:	20417920h
+Retentive data size:		       0h
+
+Start bit data area:		       0h
+End bit data area:		       0h
+Bit data size:			       0h
+
+
+
+********************************************
+CODE ID:                                FCB2F04D
+DEBUG MEMO ID:                          0000FD87
+FULL MEMO ID:                           0000923A
+********************************************
