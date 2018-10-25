@@ -4,7 +4,7 @@ Questo progetto illustra come utilizzare un PLC con programmazione IEC-61131 per
 
 Questo blocco funzione gestisce la decodifica del protocollo HS1527, EV1527, RT1527 o FP1527 in uscita da un ricevitore RF tipo MX-05V come quello visibile nella foto.
 
-![MX-05V receiver](https://github.com/ElsistWebmaster/Home-automation-RF433/blob/master/Images/MX-05V-RF-Receiver.jpg?raw=true)
+![MX-05V receiver](https://github.com/ElsistWebmaster/RFBridgeInterface/blob/master/Images/Sonoff_RF_Bridge.jpg?raw=true)
 
 # CPU SlimLine
 
